@@ -1,6 +1,7 @@
 ﻿using HtmlAgilityPack;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -24,7 +25,15 @@ namespace WebScraper
         public MainWindow()
         {
             InitializeComponent();
-
+            DataContext = new MainBinding
+            {
+                Urls = "Initial URL",
+                FileBindings = new ObservableCollection<FileBinding>
+                {
+                    new FileBinding { FileName = "File1.txt", Size = 1024, Downloading = 10 },
+                    new FileBinding { FileName = "File2.txt", Size = 2048, Downloading = 10 }
+                }
+            };
           
         }
 

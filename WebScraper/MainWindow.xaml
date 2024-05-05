@@ -25,10 +25,10 @@
 
             <TextBlock Grid.Row="0" Margin="10" Text="Strony do skopiowania:"></TextBlock>
             <TextBox Grid.Row="1" Margin="10" Name="txtUrl" TextWrapping="Wrap" AcceptsReturn="True" 
-          VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Auto"/>
+          VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Auto" Text="{Binding Urls, Mode=TwoWay}"/>
 
             <TextBlock Grid.Row="2" Margin="10" Text="Domena do podmiany:"></TextBlock>
-            <TextBox Grid.Row="3" Margin="10"></TextBox>
+            <TextBox Grid.Row="3" Margin="10" Text="{Binding Domain, Mode=TwoWay}"></TextBox>
             
             <StackPanel Grid.Row="4" Margin="5" HorizontalAlignment="Right" Orientation="Horizontal">
                 <Button Content="Start" Name="btnStart" Margin="5"/>
@@ -46,21 +46,19 @@
                 <RowDefinition Height="Auto" />
 
             </Grid.RowDefinitions>
-            <ListView Grid.Row="0" Margin="10" Name="lstDownloadedFiles">
+            <ListView Grid.Row="0" Margin="10" Name="lstDownloadedFiles" ItemsSource="{Binding FileBindings}">
                 <ListView.View>
                     <GridView>
                         <GridViewColumn Header="Nazwa pliku" Width="Auto" DisplayMemberBinding="{Binding FileName}" />
                         <GridViewColumn Header="Rozmiar pliku" Width="Auto" DisplayMemberBinding="{Binding Size}" />
+                        <GridViewColumn Header="Pobieranie (%)" Width="Auto" DisplayMemberBinding="{Binding Downloading}" />
+
                     </GridView>
                 </ListView.View>
             </ListView>
 
-            <TextBlock  Grid.Row="1" Margin="5" Text="aktualnt plik"></TextBlock>
-            <ProgressBar Grid.Row="2" Margin="5" Value="10" Name="progressBarTotal" Height="20" VerticalAlignment="Top"/>
-
-            <TextBlock  Grid.Row="3" Margin="5" Text="Całkowity Postęp"></TextBlock>
-
-            <ProgressBar Grid.Row="4" Margin="5" Name="progressBarCurrent" Height="20" VerticalAlignment="Bottom"/>
+            <TextBlock  Grid.Row="1" Margin="5" Text="Całkowity Postęp"></TextBlock>
+            <ProgressBar Grid.Row="2" Margin="5" Value="{Binding TotalProgressBar}" Name="progressBarTotal" Height="20" VerticalAlignment="Top"/>
 
         </Grid>
 
