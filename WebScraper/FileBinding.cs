@@ -1,14 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel;
 
 namespace WebScraper
 {
     public class FileBinding : INotifyPropertyChanged
     {
+        private string _url;
+
+        public string Url
+        {
+            get { return _url; }
+            set
+            {
+
+                _url = value;
+                OnPropertyChanged(nameof(Url));
+
+            }
+        }
+
         private int _downloading;
         public int Downloading
         {
@@ -53,11 +62,19 @@ namespace WebScraper
             }
         }
 
+
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         protected virtual void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is FileBinding binding &&
+                   Url == binding.Url;
         }
     }
 }

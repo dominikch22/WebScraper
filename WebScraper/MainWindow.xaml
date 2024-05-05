@@ -49,7 +49,7 @@
             <ListView Grid.Row="0" Margin="10" Name="lstDownloadedFiles" ItemsSource="{Binding FileBindings}">
                 <ListView.View>
                     <GridView>
-                        <GridViewColumn Header="Nazwa pliku" Width="Auto" DisplayMemberBinding="{Binding FileName}" />
+                        <GridViewColumn Header="Url pliku" Width="Auto" DisplayMemberBinding="{Binding Url}" />
                         <GridViewColumn Header="Rozmiar pliku" Width="Auto" DisplayMemberBinding="{Binding Size}" />
                         <GridViewColumn Header="Pobieranie (%)" Width="Auto" DisplayMemberBinding="{Binding Downloading}" />
 
