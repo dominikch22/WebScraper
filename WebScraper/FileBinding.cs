@@ -62,6 +62,19 @@ namespace WebScraper
             }
         }
 
+        private string _error;
+
+        public string Error
+        {
+            get { return _error; }
+            set
+            {
+
+                _error = value;
+                OnPropertyChanged(nameof(Error));
+
+            }
+        }
 
 
         public event PropertyChangedEventHandler PropertyChanged;

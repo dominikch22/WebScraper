@@ -46,12 +46,40 @@
                 <RowDefinition Height="Auto" />
 
             </Grid.RowDefinitions>
+            
+            
             <ListView Grid.Row="0" Margin="10" Name="lstDownloadedFiles" ItemsSource="{Binding FileBindings}">
+                <ListView.Resources>
+                    <!-- Definicja stylu ToolTip dla elementów ListView -->
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="ToolTip">
+                            <Setter.Value>
+                                <ToolTip>
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Url}" TextWrapping="Wrap" FontWeight="Bold"/>
+                                        <TextBlock>
+                                             <Run Text="Rozmiar w B: "/>
+                                               <Run Text="{Binding Size}"/>
+                                        </TextBlock>
+                                        <TextBlock Text="{Binding Downloading}">
+                                            <Run Text="Pobieranie: "/>
+                                            <Run Text="{Binding Downloading}"/>
+                                            <Run Text=" %"/>
+
+                                        </TextBlock>
+                                        <TextBlock Text="{Binding Error}" TextWrapping="Wrap" Foreground="Red"/>
+                                    </StackPanel>
+                                </ToolTip>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </ListView.Resources>
                 <ListView.View>
                     <GridView>
-                        <GridViewColumn Header="Url pliku" Width="Auto" DisplayMemberBinding="{Binding Url}" />
+                        <GridViewColumn Header="Url pliku" Width="400" DisplayMemberBinding="{Binding Url}" />
                         <GridViewColumn Header="Rozmiar pliku" Width="Auto" DisplayMemberBinding="{Binding Size}" />
                         <GridViewColumn Header="Pobieranie (%)" Width="Auto" DisplayMemberBinding="{Binding Downloading}" />
+                        <GridViewColumn Header="Błąd" Width="Auto" DisplayMemberBinding="{Binding Error}" />
 
                     </GridView>
                 </ListView.View>

@@ -43,7 +43,7 @@ namespace WebScraper
 
         }
 
-        public void StartDownloadingResources()
+        public async void StartDownloadingResources()
         {
 
             foreach (HtmlContent htmlContent in HtmlContents)
@@ -52,6 +52,9 @@ namespace WebScraper
                 //DownloadResourcesFromNodes(nodes);
             }
 
+            foreach (FileBinding file in MainBinding.FileBindings) {
+                await DownloadResource(file);
+            }
             /*bool allTasksCompleted = CountdownEvent.Wait(TimeSpan.FromSeconds(1));
             if (allTasksCompleted)
             {
@@ -93,7 +96,6 @@ namespace WebScraper
 
                 HtmlContents.Add(htmlContent);
 
-                CountdownEvent.Signal();
             }
         }
 
@@ -164,18 +166,40 @@ namespace WebScraper
             }
         }
 
-        public void DownloadResource(string resourceUrl)
+        public async Task DownloadResource(FileBinding file)
         {
-            using (WebClient client = new WebClient())
+            try
             {
-
-                client.DownloadProgressChanged += (sender, e) =>
+                using (WebClient client = new WebClient())
                 {
-                    MainBinding.TotalProgressBar = e.ProgressPercentage;
-                };
+
+                    client.DownloadProgressChanged += (sender, e) =>
+                    {
+                        file.Downloading = e.ProgressPercentage;
+                        file.Size = e.TotalBytesToReceive;
+                    };
+
+                    if (file.Url == null)
+                        return;
+                    Uri uri = new Uri(file.Url);
+
+                    string localPath = uri.LocalPath.Replace("/", "\\");
+                    string currentDirectory = @"C:\webscraper\";
+
+                    string combinedPath = currentDirectory + localPath;
+                    combinedPath = combinedPath.Replace("\\\\", "\\");
+
+                    Directory.CreateDirectory(Path.GetDirectoryName(combinedPath));
 
 
+                    await client.DownloadFileTaskAsync(file.Url, combinedPath);
+
+                }
             }
+            catch(Exception e) {
+                file.Error = e.Message;
+            }
+            
         }
 
     }
