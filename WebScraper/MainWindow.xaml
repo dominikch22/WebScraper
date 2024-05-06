@@ -61,7 +61,7 @@
                                              <Run Text="Rozmiar w B: "/>
                                                <Run Text="{Binding Size}"/>
                                         </TextBlock>
-                                        <TextBlock Text="{Binding Downloading}">
+                                        <TextBlock>
                                             <Run Text="Pobieranie: "/>
                                             <Run Text="{Binding Downloading}"/>
                                             <Run Text=" %"/>
