@@ -71,6 +71,19 @@ namespace WebScraper
             }
         }
 
+        private bool _serverPaths;
+        public bool ServerPaths
+        {
+            get { return _serverPaths; }
+            set
+            {
+
+                _serverPaths = value;
+                OnPropertyChanged(nameof(ServerPaths));
+
+            }
+        }
+
         private bool _shorterDirectories;
         public bool ShorterDirectories
         {
@@ -83,6 +96,8 @@ namespace WebScraper
 
             }
         }
+
+
 
         private int _downloadSuccess;
         private int _downloadFailure;
@@ -115,7 +130,7 @@ namespace WebScraper
             Urls = "";
             FileBindings = new ObservableCollection<FileBinding>();
             //FileProgressBar = 0;
-            ShorterDirectories = true;
+            ServerPaths = true;
             TotalProgressBar = 0;
             //DownloadedFile = string.Empty;
         }

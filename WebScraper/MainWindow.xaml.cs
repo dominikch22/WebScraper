@@ -22,17 +22,37 @@ namespace WebScraper
 {
     public partial class MainWindow : Window
     {
+        public MainBinding MainBinding;
         public MainWindow()
         {
             InitializeComponent();
 
-            MainBinding mainBinding = new MainBinding();
+            MainBinding = new MainBinding();
 
-            DataContext = mainBinding;
+            DataContext = MainBinding;
 
-            WebScrapper web = new WebScrapper(mainBinding, "https://akademiabialska.pl");
-            web.StartDownloading();
+            List<string> urls = new List<string> { "https://akademiabialska.pl", "https://akademiabialska.pl/aktualnosci/x-ogolnopolska-konferencja-studenckich-kol-naukowych-151.html", "https://rekrutacja.akademiabialska.pl/aktualnosci/fotorelacja-z-dnia-otwartego-2024-12.html" };
+
+            MainBinding.Urls = string.Join("\r\n\r\n", urls);
+            MainBinding.Domain = "alamakota.pl";
+
+            DownloadService downloadService = new DownloadService(MainBinding);
+            downloadService.Start();
+            /*downloadService.IndexAndDownloadAllUrls();
+            downloadService.DownloadAllResources();*/
+            /* WebScrapper web = new WebScrapper(mainBinding, "https://akademiabialska.pl", "alamakota.pl");
+             web.DownloadAndIndexReosurces();
+
+             WebScrapper web1 = new WebScrapper(mainBinding, "https://akademiabialska.pl/aktualnosci/x-ogolnopolska-konferencja-studenckich-kol-naukowych-151.html", "alamakota.pl");
+             web1.DownloadAndIndexReosurces();
+
+             WebScrapper web2 = new WebScrapper(mainBinding, "https://rekrutacja.akademiabialska.pl/aktualnosci/fotorelacja-z-dnia-otwartego-2024-12.html", "alamakota.pl");
+             web2.DownloadAndIndexReosurces();*/
+
+            //web2.DownloadAllResources();
         }
+
+
 
 
     }

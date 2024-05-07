@@ -76,11 +76,17 @@ namespace WebScraper
             }
         }
 
-        public FileBinding(string url, long size, int downloading) { 
+        public string Domain;
+        public string Path;
+
+        public FileBinding(string url, long size, int downloading, string domain) { 
             Url = url;
             Size = size;
             Downloading = downloading;
+            Domain = domain;
         }
+
+
 
         public FileBinding() { }
 
