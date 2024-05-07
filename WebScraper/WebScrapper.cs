@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Net.Http;
 using System.Security.Policy;
 using System.Text;
 using System.Threading;
@@ -13,31 +14,33 @@ namespace WebScraper
     public class WebScrapper
     {
         public MainBinding MainBinding;
-        public List<HtmlContent> HtmlContents { get; set; }
-        //public List<HtmlNodeCollection> HtmlNodes { get; set; }
-        public List<string> Urls;
-        public CountdownEvent CountdownEvent;
+        //public List<HtmlContent> HtmlContents { get; set; }
+        public HtmlNodeCollection HtmlNodes { get; set; }
+        public string Content;
+        public string Url;
 
-        public WebScrapper(MainBinding mainBinding, List<string> urls)
+        public WebScrapper(MainBinding mainBinding, string url)
         {
             MainBinding = mainBinding;
-            Urls = urls;
-            CountdownEvent = new CountdownEvent(Urls.Count);
-            HtmlContents = new List<HtmlContent>();
-            //HtmlNodes = new List<HtmlNodeCollection>();
+            Url = url;
+            //HtmlContents = new List<HtmlContent>();
+            //Html
         }
         public async Task StartDownloading()
         {
-            List<Task> downloadTasks = new List<Task>();
-            foreach (string url in Urls)
+            //List<Task> downloadTasks = new List<Task>();
+            await DownloadHtml(Url);
+
+           /* foreach (string url in Urls)
             {
                 //ThreadPool.QueueUserWorkItem((async (_) => await ));
                 //DownloadHtml(url);
                 downloadTasks.Add(DownloadHtml(url));
-            }
+            }*/
 
-            await Task.WhenAll(downloadTasks);
+            //await Task.WhenAll(downloadTasks);
 
+            IndexResources();
             StartDownloadingResources();
 
 
@@ -46,14 +49,14 @@ namespace WebScraper
         public async void StartDownloadingResources()
         {
 
-            foreach (HtmlContent htmlContent in HtmlContents)
+           /* foreach (HtmlContent htmlContent in HtmlContents)
             {
                 IndexResources(htmlContent);
                 //DownloadResourcesFromNodes(nodes);
-            }
+            }*/
 
             foreach (FileBinding file in MainBinding.FileBindings) {
-                await DownloadResource(file);
+                DownloadResource(file);
             }
             /*bool allTasksCompleted = CountdownEvent.Wait(TimeSpan.FromSeconds(1));
             if (allTasksCompleted)
@@ -64,13 +67,13 @@ namespace WebScraper
 
         public async Task DownloadHtml(string url)
         {
-            using (WebClient client = new WebClient())
+            using (HttpClient client = new HttpClient())
             {
 
-                client.DownloadProgressChanged += (sender, e) =>
+                /*client.DownloadProgressChanged += (sender, e) =>
                 {
                     MainBinding.TotalProgressBar = e.ProgressPercentage;
-                };
+                };*/
 
                 /*client.DownloadFileCompleted += (sender, e) =>
                 {
@@ -84,25 +87,33 @@ namespace WebScraper
                     }
                 };*/
 
+                HttpResponseMessage response = await client.GetAsync(url);
+                response.EnsureSuccessStatusCode();
 
-                string content = Encoding.UTF8.GetString(await client.DownloadDataTaskAsync(new Uri(url)));
+                // Pobierz zawartość odpowiedzi jako ciąg znaków (HTML)
+                Content = await response.Content.ReadAsStringAsync();
+                //Content = Encoding.UTF8.GetString(await client.get(new Uri(url)));
                 //HtmlContents.Add(content);
 
-                HtmlNodeCollection nodes = await GetImgLinkScriptNodesFromHtml(content);
+                MainBinding.FileBindings.Add(new FileBinding(url, response.Content.Headers.ContentLength.Value, 100));
+
+                HtmlNodes = await GetImgLinkScriptNodesFromHtml(Content);
+
+
                 //HtmlNodes.Add(nodes);
-                HtmlContent htmlContent = new HtmlContent();
+                /*HtmlContent htmlContent = new HtmlContent();
                 htmlContent.Url = url;
                 htmlContent.Nodes = nodes;
 
-                HtmlContents.Add(htmlContent);
+                HtmlContents.Add(htmlContent);*/
 
             }
         }
 
-        public void IndexResources(HtmlContent htmlContent)
+        public void IndexResources()
         {
             string resourceUrl = null;
-            foreach (HtmlNode node in htmlContent.Nodes)
+            foreach (HtmlNode node in HtmlNodes)
             {
                 if (node.Name == "img" || node.Name == "script")
                 {
@@ -116,7 +127,7 @@ namespace WebScraper
                 if (!string.IsNullOrEmpty(resourceUrl))
                 {
                     FileBinding fileBinding = new FileBinding();
-                    fileBinding.Url = htmlContent.Url + resourceUrl;
+                    fileBinding.Url = Url + resourceUrl;
 
                     //Uri uri = new Uri(resourceUrl);
                     //fileBinding.FileName = Path.Combine(Directory.GetCurrentDirectory(), Path.GetFileName(uri.LocalPath));
@@ -181,26 +192,50 @@ namespace WebScraper
 
                     if (file.Url == null)
                         return;
+                    
+
                     Uri uri = new Uri(file.Url);
 
                     string localPath = uri.LocalPath.Replace("/", "\\");
                     string currentDirectory = @"C:\webscraper\";
 
+
+                    if (MainBinding.ShorterDirectories && localPath.Length > 100)
+                        localPath = localPath.MakeShorterPath();
                     string combinedPath = currentDirectory + localPath;
+
                     combinedPath = combinedPath.Replace("\\\\", "\\");
+
+                    
 
                     Directory.CreateDirectory(Path.GetDirectoryName(combinedPath));
 
 
                     await client.DownloadFileTaskAsync(file.Url, combinedPath);
 
+                    MainBinding.DownloadSuccess += 1;
+                    CalculateTotalProgress();
                 }
             }
             catch(Exception e) {
+                MainBinding.DownloadFailure += 1;
+
                 file.Error = e.Message;
             }
             
         }
 
+
+        public void CalculateTotalProgress() { 
+            double count = MainBinding.FileBindings.Count;
+            double sum = 0;
+            foreach(var file in MainBinding.FileBindings) {
+                if (file.Error != null)
+                    sum += 1;
+                else
+                    sum += (double)file.Downloading / 100;
+            }
+            MainBinding.TotalProgressBar = (int)(count / sum)*100;
+        }
     }
 }

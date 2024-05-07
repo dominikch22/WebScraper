@@ -13,7 +13,7 @@ namespace WebScraper
             string[] directories = path.Split('\\');
 
 
-            for (int i = 0; i < directories.Length; i++) {
+            for (int i = 0; i < directories.Length-1; i++) {
                 if (directories[i].Length > 25)
                     directories[i] = GenerateRandomDirectoryName(7);
             }

@@ -76,6 +76,13 @@ namespace WebScraper
             }
         }
 
+        public FileBinding(string url, long size, int downloading) { 
+            Url = url;
+            Size = size;
+            Downloading = downloading;
+        }
+
+        public FileBinding() { }
 
         public event PropertyChangedEventHandler PropertyChanged;
 

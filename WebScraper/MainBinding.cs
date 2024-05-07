@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace WebScraper
 {
@@ -64,13 +59,65 @@ namespace WebScraper
                 OnPropertyChanged(nameof(DownloadedFile));
             }
         }
+
+        private string _domain;
+        public string Domain
+        {
+            get { return _domain; }
+            set
+            {
+                _domain = value;
+                OnPropertyChanged(nameof(Domain));
+            }
+        }
+
+        private bool _shorterDirectories;
+        public bool ShorterDirectories
+        {
+            get { return _shorterDirectories; }
+            set
+            {
+
+                _shorterDirectories = value;
+                OnPropertyChanged(nameof(ShorterDirectories));
+
+            }
+        }
+
+        private int _downloadSuccess;
+        private int _downloadFailure;
+
+        public int DownloadSuccess
+        {
+            get { return _downloadSuccess; }
+            set
+            {
+                
+                    _downloadSuccess = value;
+                    OnPropertyChanged(nameof(DownloadSuccess));
+                
+            }
+        }
+
+        public int DownloadFailure
+        {
+            get { return _downloadFailure; }
+            set
+            {
+               
+                    _downloadFailure = value;
+                    OnPropertyChanged(nameof(DownloadFailure));
+                
+            }
+        }
         public MainBinding()
         {
-            Urls = string.Empty;
+            Urls = "";
             FileBindings = new ObservableCollection<FileBinding>();
-            FileProgressBar = 0;
+            //FileProgressBar = 0;
+            ShorterDirectories = true;
             TotalProgressBar = 0;
-            DownloadedFile = string.Empty;
+            //DownloadedFile = string.Empty;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

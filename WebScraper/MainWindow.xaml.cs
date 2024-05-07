@@ -25,21 +25,12 @@ namespace WebScraper
         public MainWindow()
         {
             InitializeComponent();
-            
-            MainBinding mainBinding = new MainBinding
-            {
-                Urls = "Initial URL",
-                FileBindings = new ObservableCollection<FileBinding>
-                {
-                    new FileBinding { FileName = "File1.txt", Size = 1024, Downloading = 10 },
-                    new FileBinding { FileName = "File2.txt", Size = 2048, Downloading = 10 }
-                },
-                TotalProgressBar = 10
-            };
+
+            MainBinding mainBinding = new MainBinding();
 
             DataContext = mainBinding;
 
-            WebScrapper web = new WebScrapper(mainBinding, new List<string> { "https://akademiabialska.pl" });
+            WebScrapper web = new WebScrapper(mainBinding, "https://akademiabialska.pl");
             web.StartDownloading();
         }
 
