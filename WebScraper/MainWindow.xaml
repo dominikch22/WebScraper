@@ -39,7 +39,7 @@
                 <Button Content="Kontynuje" Click="ContinueClicked" Name="btnContinue" Margin="5"/>
             </StackPanel>
 
-            <CheckBox Margin="10" Grid.Row="5" Content="Skracanie zbyt długich ścieżek" IsChecked="{Binding ShorterDirectories}" />
+            <CheckBox Margin="10" Grid.Row="5" IsEnabled="False" Content="Skracanie zbyt długich ścieżek" IsChecked="{Binding ShorterDirectories}" />
         </Grid>
 
         <Grid Grid.Column="1">

@@ -43,7 +43,7 @@ namespace WebScraper
         }
 
 
-        public static string ChangeUrlToWindowsPath(string url, string domain) {
+        public static string ChangeUrlToWindowsPath(string url, string folder) {
             Uri uri = new Uri(url);
             if (string.IsNullOrEmpty(uri.AbsolutePath) || uri.AbsolutePath.Equals("/")) {
                 url += "/index.html";
@@ -53,7 +53,7 @@ namespace WebScraper
 
             string localPath = uri.LocalPath.Replace("/", "\\");
 
-            string currentDirectory = $"C:\\webscraper\\{domain}\\";
+            string currentDirectory = $"C:\\webscraper\\{folder}\\";
 
             /*if (localPath.Length > 100)
                 localPath = localPath.MakeShorterWindowsPath();*/
@@ -66,10 +66,11 @@ namespace WebScraper
         }
 
         public static string MakeUrl(string contextUrl, string localPath) {
-            contextUrl = GetUrlwithoutParams(contextUrl);
+            //contextUrl = GetUrlwithoutParams(contextUrl);
             
             if (localPath.StartsWith("http")) {
-                return GetUrlwithoutParams(localPath);
+                return localPath;
+                //return GetUrlwithoutParams(localPath);
             }
             else if (localPath.StartsWith(".."))
             {
@@ -80,7 +81,7 @@ namespace WebScraper
             else if (localPath[0] == '/') {
                 string baseUrl = GetBaseUrl(contextUrl);
                 
-                return GetUrlwithoutParams(baseUrl + localPath);
+                return baseUrl + localPath;
             }     
             else {
                 return "";

@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Http;
 using System.Security.Policy;
 using System.Threading.Tasks;
+using System.Windows.Controls;
 using System.Windows.Shapes;
 using Path = System.IO.Path;
 
@@ -67,11 +68,30 @@ namespace WebScraper
             }
         }
 
+        public void ReplaceHyperLinks(HtmlDocument htmlDocument) {
+            var nodes = htmlDocument.DocumentNode.SelectNodes("//a[@href]");
+
+            if (nodes != null)
+            {
+                foreach (var node in nodes)
+                {
+                    string url = node.GetAttributeValue("href", null);
+                    if (url.StartsWith("http")) {
+                        Uri uri = new Uri(url);
+                        node.SetAttributeValue("href", Domain + uri.AbsolutePath);
+                    }
+                    
+                }
+            }
+        }
+
         public void IndexResources(string content)
         {
 
             HtmlDocument htmlDocument = new HtmlDocument();
             htmlDocument.LoadHtml(content);
+
+            ReplaceHyperLinks(htmlDocument);
 
             HtmlNodeCollection nodes = htmlDocument.DocumentNode.SelectNodes("//img|//link|//script");
 
@@ -93,6 +113,7 @@ namespace WebScraper
 
                 }
 
+
                 if (!string.IsNullOrEmpty(localPath))
                 {
                     FileBinding fileBinding = new FileBinding();
@@ -101,7 +122,7 @@ namespace WebScraper
                     string shorterLocalPath = localPath.MakeShorterLocalPath();
                     node.SetAttributeValue(atrributeName, shorterLocalPath);
 
-                    string windowsPath = CssParser.ChangeUrlToWindowsPath(url, Domain);
+                    string windowsPath = CssParser.ChangeUrlToWindowsPath(url, PathOperation.GetFolderFromDomain(Domain));
                     string shorterWindowsPath = windowsPath.MakeShorterWindowsPath();
 
 
@@ -121,7 +142,7 @@ namespace WebScraper
             MainBinding.FilesCount = MainBinding.FileBindings.Count;
 
 
-            string windowspHtlmPath = CssParser.ChangeUrlToWindowsPath(Url, Domain);
+            string windowspHtlmPath = CssParser.ChangeUrlToWindowsPath(Url, PathOperation.GetFolderFromDomain(Domain));
             Directory.CreateDirectory(Path.GetDirectoryName(windowspHtlmPath));
             htmlDocument.Save(windowspHtlmPath);
         }
@@ -129,7 +150,7 @@ namespace WebScraper
       
         public async Task DownloadResource(FileBinding file)
         {
-            if (file.Downloading == 100 || file.Error != null)
+            if (file.Downloading == 100)
                 return;
             try
             {
@@ -141,7 +162,7 @@ namespace WebScraper
                         file.Size = e.TotalBytesToReceive;
                     };                  
 
-                    string path = CssParser.ChangeUrlToWindowsPath(file.Url, file.Domain);
+                    string path = CssParser.ChangeUrlToWindowsPath(file.Url, PathOperation.GetFolderFromDomain(file.Domain));
 
                     Directory.CreateDirectory(Path.GetDirectoryName(file.FileLocation));
 
@@ -164,7 +185,13 @@ namespace WebScraper
             }
             catch (Exception e)
             {
+                
                 file.Error = e.Message;
+
+                if (e.Message.Contains("The request was aborted")) {
+                    file.Error = null;
+                }
+                    
             }
         }
 
@@ -187,7 +214,7 @@ namespace WebScraper
 
 
                     fileBinding.Domain = Domain;
-                    fileBinding.FileLocation = CssParser.ChangeUrlToWindowsPath(url, fileBinding.Domain); ;
+                    fileBinding.FileLocation = CssParser.ChangeUrlToWindowsPath(url, PathOperation.GetFolderFromDomain(fileBinding.Domain)); ;
 
 
                     fileBinding.Downloading = 0;
@@ -210,8 +237,8 @@ namespace WebScraper
 
         public void CalculateTotalProgress()
         {
-            double count = MainBinding.FileBindings.Count;
-            double sum = 0;
+            int count = MainBinding.FileBindings.Count;
+            int sum = 0;
 
             MainBinding.DownloadFailure = 0;
             MainBinding.DownloadSuccess = 0;
@@ -224,7 +251,9 @@ namespace WebScraper
                 if (file.Error != null || file.Downloading == 100)
                     sum += 1;
             }
-            double progress = (sum / count) * 100;
+            int progress = (sum / count) * 100;
+            if (progress == 100)
+                MainBinding.Running = false;
             MainBinding.TotalProgressBar = (int)progress;
         }
 

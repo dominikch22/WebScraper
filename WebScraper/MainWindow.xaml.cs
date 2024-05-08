@@ -25,10 +25,10 @@ namespace WebScraper
     {
         public MainBinding MainBinding;
         public DownloadService DownloadService;
+
         public MainWindow()
         {
             InitializeComponent();
-            //LocalHttpServer.Start();
             MainBinding = new MainBinding();
 
             DataContext = MainBinding;
@@ -43,29 +43,33 @@ namespace WebScraper
         }
 
         public void StartClicked(object sender, RoutedEventArgs e) {
-            //DownloadService = new DownloadService(MainBinding);
-            /*  WebScrapper webScrapper = new WebScrapper(MainBinding, "https://akademiabialska.pl", "kott");
-              webScrapper.IndexAndDownload();*/
-            //DownloadService.Start();
-            Thread newThread = new Thread(new ParameterizedThreadStart(LocalHttpServer.Start));
+            if (!MainBinding.Running) {
+                MainBinding.FileBindings = new ObservableCollection<FileBinding>();
+                DownloadService = new DownloadService(MainBinding);
+                DownloadService.Start();
+                MainBinding.Running = true;
 
-            // Przekazanie argumentu do nowego wątku
-            newThread.Start(MainBinding.Domain);
-            // Uruchomienie nowego wątku
+                LocalHttpServer.Start(PathOperation.GetFolderFromDomain(MainBinding.Domain));
+            }
+            
 
-
-            DownloadService = new DownloadService(MainBinding);
-            DownloadService.Start();
+           
         }
 
         public void StopClicked(object sender, RoutedEventArgs e)
         {
+            MainBinding.Running = false;
             DownloadService.StopDownloading();
         }
 
         public void ContinueClicked(object sender, RoutedEventArgs e)
         {
-            DownloadService.Start();
+            if (!MainBinding.Running)
+            {
+                DownloadService = new DownloadService(MainBinding);
+                DownloadService.Start();
+                MainBinding.Running = true;
+            }
         }
 
 

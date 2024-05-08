@@ -139,6 +139,8 @@ namespace WebScraper
                 
             }
         }
+
+        public bool Running;
         public MainBinding()
         {
             Urls = "";
@@ -146,6 +148,8 @@ namespace WebScraper
             //FileProgressBar = 0;
             ServerPaths = true;
             TotalProgressBar = 0;
+            Running = false;
+            ShorterDirectories = true;
             //DownloadedFile = string.Empty;
         }
 

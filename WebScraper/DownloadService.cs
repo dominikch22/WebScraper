@@ -57,6 +57,7 @@ namespace WebScraper
                 WebScrapper webScrapper = new WebScrapper(MainBinding, file.Url, file.Domain);
                 WebScrappers.Add(webScrapper);
                 downloadResourceTask.Add(webScrapper.DownloadResource(file));
+                //await Task.Delay(50);
 
             }
             await Task.WhenAll(downloadResourceTask);
@@ -69,6 +70,7 @@ namespace WebScraper
                 WebScrapper webScrapper = new WebScrapper(MainBinding, file.Url, file.Domain);
                 WebScrappers.Add(webScrapper);
                 webScrapper.DownloadResource(file);
+                //await Task.Delay(50);
 
             }
         }
@@ -325,7 +327,8 @@ namespace WebScraper
         {
             foreach (WebScrapper scrapper in WebScrappers)
             {
-                scrapper.Client.CancelAsync();
+                if(scrapper.Client != null)
+                    scrapper.Client.CancelAsync();
             }
         }
 
