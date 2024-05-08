@@ -59,7 +59,6 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="CssParser.cs" />
-    <Compile Include="DownloadResourceTask.cs" />
     <Compile Include="DownloadService.cs" />
     <Compile Include="HtmlContent.cs" />
     <Compile Include="LocalHttpServer.cs" />

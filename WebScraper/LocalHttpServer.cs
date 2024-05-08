@@ -11,10 +11,11 @@ namespace WebScraper
 {
     public class LocalHttpServer
     {
-        public static void Start()
+        public static void Start(object param)
         {
+            string domain = (string)param;
             // Ścieżka do folderu, który ma być udostępniony przez serwer
-            string folderPath = @"C:\webscraper\alamakota.pl\";
+            string folderPath = $"C:\\webscraper\\{domain}\\";
 
             // Adres URL serwera
             string serverUrl = "http://localhost:8080/";
@@ -63,9 +64,24 @@ namespace WebScraper
                         }
                         else if (filePath.EndsWith(".min"))
                         {
-                            // Załóżmy, że .min to pliki fontów, użyj application/font-woff
-                            contentType = "application/font-woff";
+                            contentType = "text/css";
                         }
+                        
+                        else if (filePath.EndsWith(".js"))
+                        {
+                            contentType = "application/javascript";
+                        }
+
+                        else if (filePath.EndsWith(".png"))
+                        {
+                            contentType = "image/png";
+                        }
+
+                        else if (filePath.EndsWith(".jpg") || filePath.EndsWith(".jpeg"))
+                        {
+                            contentType = "image/jpeg";
+                        }
+
                         else
                         {
                             contentType = "application/octet-stream";

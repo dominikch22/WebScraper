@@ -14,7 +14,6 @@ namespace WebScraper
 {
     public class DownloadService
     {
-        public List<DownloadResourceTask> DownloadResourceTasks;
         public MainBinding MainBinding { get; set; }
         public string[] Urls;
         public string Domain;
@@ -28,7 +27,6 @@ namespace WebScraper
             MainBinding = mainBinding;
             Domain = (string)mainBinding.Domain.Clone();
             GetUrls();
-            DownloadResourceTasks = new List<DownloadResourceTask>();
             WebClients = new List<WebClient>();
             ChangedUrls = new Dictionary<string, string>();
             WebScrappers = new List<WebScrapper>();
@@ -48,19 +46,24 @@ namespace WebScraper
                 WebScrappers.Add(webScrapper);
                 await webScrapper.IndexAndDownload();
             }
-            DownloadResources();
+            DownloadHtmlResources();
         }
 
-        public async Task DownloadResources()
+        public async Task DownloadHtmlResources()
         {
+            List<Task> downloadResourceTask = new List<Task>();
             foreach (FileBinding file in MainBinding.FileBindings)
             {
                 WebScrapper webScrapper = new WebScrapper(MainBinding, file.Url, file.Domain);
                 WebScrappers.Add(webScrapper);
-                webScrapper.DownloadResource(file);
+                downloadResourceTask.Add(webScrapper.DownloadResource(file));
 
             }
-            await Task.Delay(2000);
+            await Task.WhenAll(downloadResourceTask);
+            DownloadCssResources();
+        }
+
+        public async Task DownloadCssResources() {
             foreach (FileBinding file in MainBinding.FileBindings)
             {
                 WebScrapper webScrapper = new WebScrapper(MainBinding, file.Url, file.Domain);

@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Security.Policy;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -46,6 +47,13 @@ namespace WebScraper
             /*  WebScrapper webScrapper = new WebScrapper(MainBinding, "https://akademiabialska.pl", "kott");
               webScrapper.IndexAndDownload();*/
             //DownloadService.Start();
+            Thread newThread = new Thread(new ParameterizedThreadStart(LocalHttpServer.Start));
+
+            // Przekazanie argumentu do nowego wątku
+            newThread.Start(MainBinding.Domain);
+            // Uruchomienie nowego wątku
+
+
             DownloadService = new DownloadService(MainBinding);
             DownloadService.Start();
         }
@@ -57,7 +65,7 @@ namespace WebScraper
 
         public void ContinueClicked(object sender, RoutedEventArgs e)
         {
-
+            DownloadService.Start();
         }
 
 

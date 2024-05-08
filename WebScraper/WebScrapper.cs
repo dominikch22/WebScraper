@@ -74,7 +74,6 @@ namespace WebScraper
             htmlDocument.LoadHtml(content);
 
             HtmlNodeCollection nodes = htmlDocument.DocumentNode.SelectNodes("//img|//link|//script");
-            //HtmlNodeCollection htmlNodes = GetImgLinkScriptNodesFromHtml(content);
 
 
             string localPath = null;
@@ -101,9 +100,6 @@ namespace WebScraper
 
                     string shorterLocalPath = localPath.MakeShorterLocalPath();
                     node.SetAttributeValue(atrributeName, shorterLocalPath);
-                    //node.SetAttributeValue(atrributeName, "chuj");
-
-
 
                     string windowsPath = CssParser.ChangeUrlToWindowsPath(url, Domain);
                     string shorterWindowsPath = windowsPath.MakeShorterWindowsPath();
@@ -118,8 +114,6 @@ namespace WebScraper
 
                     if (!MainBinding.FileBindings.Contains(fileBinding)) {
                         MainBinding.FileBindings.Add(fileBinding);
-
-                        //DownloadResource(fileBinding);
                     }
                 }
             }
@@ -132,12 +126,7 @@ namespace WebScraper
             htmlDocument.Save(windowspHtlmPath);
         }
 
-       /* public HtmlNodeCollection GetImgLinkScriptNodesFromHtml(string htmlContent)
-        {
-
-            return nodes;
-        }*/
-
+      
         public async Task DownloadResource(FileBinding file)
         {
             if (file.Downloading == 100 || file.Error != null)
@@ -158,8 +147,6 @@ namespace WebScraper
 
                     if (path.EndsWith(".css") || path.EndsWith(".min"))
                     {
-
-
                         string cssContent = await Client.DownloadStringTaskAsync(file.Url);
                         await IndexCssContent(cssContent, file.Url);
                         File.WriteAllText(file.FileLocation, cssContent);
@@ -170,24 +157,13 @@ namespace WebScraper
 
                     }
 
-                    /*string content = await client.DownloadStringTaskAsync(file.Url);
-                    File.WriteAllText(combinedPath, content);*/
 
-
-                    MainBinding.DownloadSuccess += 1;
                     CalculateTotalProgress();
 
                 }
             }
-            catch (ArgumentException e)
-            {
-                file.Error = e.Message;
-
-            }
             catch (Exception e)
             {
-                MainBinding.DownloadFailure += 1;
-
                 file.Error = e.Message;
             }
         }
@@ -204,12 +180,8 @@ namespace WebScraper
                 {
                     FileBinding fileBinding = new FileBinding();
 
-                    // Parse the URL
                     string url = CssParser.MakeUrl(contextUrl, localPath);
-                    //Uri uri = new Uri("https://akademiabialska.pl" + resourceUrl);
 
-                    // Get the URL without the query string
-                    //string cleanedUrl = $"{uri.Scheme}://{uri.Host}{uri.AbsolutePath}";
                     fileBinding.Url = url;
 
 
@@ -223,10 +195,8 @@ namespace WebScraper
                     if (!MainBinding.FileBindings.Contains(fileBinding))
                     {
                         MainBinding.FileBindings.Add(fileBinding);
-                        //await DownloadResource(fileBinding);
                     }
-                    else
-                        Console.WriteLine("");
+                    
                 }
             }
 
@@ -242,12 +212,17 @@ namespace WebScraper
         {
             double count = MainBinding.FileBindings.Count;
             double sum = 0;
+
+            MainBinding.DownloadFailure = 0;
+            MainBinding.DownloadSuccess = 0;
             foreach (var file in MainBinding.FileBindings)
             {
                 if (file.Error != null)
+                    MainBinding.DownloadFailure += 1;
+                if (file.Downloading == 100)
+                    MainBinding.DownloadSuccess += 1;
+                if (file.Error != null || file.Downloading == 100)
                     sum += 1;
-                else
-                    sum += (double)file.Downloading / 100;
             }
             double progress = (sum / count) * 100;
             MainBinding.TotalProgressBar = (int)progress;
