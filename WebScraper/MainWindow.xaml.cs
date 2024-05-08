@@ -32,23 +32,27 @@ namespace WebScraper
 
             DataContext = MainBinding;
 
-            List<string> urls = new List<string> { "https://akademiabialska.pl", "https://akademiabialska.pl/aktualnosci/x-ogolnopolska-konferencja-studenckich-kol-naukowych-151.html", "https://rekrutacja.akademiabialska.pl/aktualnosci/fotorelacja-z-dnia-otwartego-2024-12.html" };
+            List<string> urls = new List<string> { "https://akademiabialska.pl"};
             //https://rekrutacja.akademiabialska.pl/oferta/informatyka-3.html
+            //, "https://akademiabialska.pl/aktualnosci/x-ogolnopolska-konferencja-studenckich-kol-naukowych-151.html", "https://rekrutacja.akademiabialska.pl/aktualnosci/fotorelacja-z-dnia-otwartego-2024-12.html" 
             MainBinding.Urls = string.Join("\r\n\r\n", urls);
-            MainBinding.Domain = "alamakota.pl";
+            MainBinding.Domain = "kott";
 
-            DownloadService = new DownloadService(MainBinding);
           
         }
 
         public void StartClicked(object sender, RoutedEventArgs e) {
+            //DownloadService = new DownloadService(MainBinding);
+            /*  WebScrapper webScrapper = new WebScrapper(MainBinding, "https://akademiabialska.pl", "kott");
+              webScrapper.IndexAndDownload();*/
+            //DownloadService.Start();
+            DownloadService = new DownloadService(MainBinding);
             DownloadService.Start();
-
         }
 
         public void StopClicked(object sender, RoutedEventArgs e)
         {
-
+            DownloadService.StopDownloading();
         }
 
         public void ContinueClicked(object sender, RoutedEventArgs e)

@@ -18,37 +18,71 @@ namespace WebScraper
         public MainBinding MainBinding { get; set; }
         public string[] Urls;
         public string Domain;
+        public string Url;
+        public List<WebClient> WebClients;
+        public Dictionary<string, string> ChangedUrls;
+
+        public List<WebScrapper> WebScrappers;
 
         public DownloadService(MainBinding mainBinding) { 
             MainBinding = mainBinding;
             Domain = (string)mainBinding.Domain.Clone();
             GetUrls();
             DownloadResourceTasks = new List<DownloadResourceTask>();
+            WebClients = new List<WebClient>();
+            ChangedUrls = new Dictionary<string, string>();
+            WebScrappers = new List<WebScrapper>();
         }
 
         public void GetUrls()
         {
             string urls = MainBinding.Urls.Replace(" ", "").Replace("\t", "").Trim();
             Urls = urls.Split(new string[] { "\n", "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+            Url = Urls[0];
         }
 
         public async Task Start() {
-            await IndexAndDownloadAllUrls();
-            DownloadAllResources();
-        }
-        public async Task IndexAndDownloadAllUrls() {
-            foreach(string url in Urls) {
-                string content = await DownloadHtml(url);
-                IndexResources(content, url);
-                /*WebScrapper web = new WebScrapper(MainBinding, url, MainBinding.Domain);
-                await web.DownloadAndIndexReosurces();*/
+            foreach (string url in Urls)
+            {
+                WebScrapper webScrapper = new WebScrapper(MainBinding, url, Domain);
+                WebScrappers.Add(webScrapper);
+                await webScrapper.IndexAndDownload();
             }
+            DownloadResources();
         }
 
-        public async Task<string> DownloadHtml(string url)
+        public async Task DownloadResources()
+        {
+            foreach (FileBinding file in MainBinding.FileBindings)
+            {
+                WebScrapper webScrapper = new WebScrapper(MainBinding, file.Url, file.Domain);
+                WebScrappers.Add(webScrapper);
+                await webScrapper.DownloadResource(file);
+            }
+        }
+        /* public async Task Start() {
+             await IndexAndDownloadAllUrls();
+             DownloadAllResources();
+         }
+         public async Task IndexAndDownloadUrl() {
+             string content = await DownloadHtml(url);
+             IndexResources(content, url);
+
+             *//*foreach (string url in Urls) {
+                 string content = await DownloadHtml(url);
+                 IndexResources(content, url);
+                 *//*WebScrapper web = new WebScrapper(MainBinding, url, MainBinding.Domain);
+                 await web.DownloadAndIndexReosurces();*//*
+             }*//*
+         }*/
+
+        /*public async Task<string> DownloadHtml(string url)
         {
             FileBinding file = new FileBinding(url, 0, 100, Domain);
-            MainBinding.FileBindings.Add(file);
+            if (!FileBindingsContains(file))
+                MainBinding.FileBindings.Add(file);
+            else
+                Console.WriteLine("");
 
             try
             {
@@ -69,7 +103,7 @@ namespace WebScraper
                     string currentDirectory = $"C:\\webscraper\\{file.Domain}\\";
 
                     if (MainBinding.ServerPaths && localPath.Length > 100)
-                        localPath = localPath.MakeShorterPath();
+                        localPath = localPath.MakeShorterWindowsPath();
 
                     string combinedPath = currentDirectory + localPath;
 
@@ -92,30 +126,50 @@ namespace WebScraper
                 file.Error = ex.Message;
                 return "";
             }
-        }
+        }*/
 
-        public void IndexResources(string content, string url)
+        /*public void IndexResources(string content, string contextUrl)
         {
+            // Parse the URL
+            //Uri domain = new Uri(contextUrl);
+
+            // Get the URL without the query string
+            //contextUrl = $"{domain.Scheme}://{domain.Host}";
+
+
+
             HtmlNodeCollection htmlNodes = GetImgLinkScriptNodesFromHtml(content);
 
-            string resourceUrl = null;
+
+            string localPath = null;
             foreach (HtmlNode node in htmlNodes)
             {
                 if (node.Name == "img" || node.Name == "script")
                 {
-                    resourceUrl = node.GetAttributeValue("src", null);
+                    localPath = node.GetAttributeValue("src", null);
+                    string shorterLocalPath = localPath.MakeShorterWindowsPath();
+                    node.SetAttributeValue("src", shorterLocalPath);
                 }
                 else if (node.Name == "link")
                 {
-                    resourceUrl = node.GetAttributeValue("href", null);
+                    localPath = node.GetAttributeValue("href", null);
+                    string shorterLocalPath = localPath.MakeShorterWindowsPath();
+                    node.SetAttributeValue("link", shorterLocalPath);
+
                 }
 
-                if (!string.IsNullOrEmpty(resourceUrl))
+                if (!string.IsNullOrEmpty(localPath))
                 {
                     FileBinding fileBinding = new FileBinding();
-                    fileBinding.Url = url + resourceUrl;
 
-                    fileBinding.FileName = resourceUrl;
+                    string shorterLocalPath = localPath.MakeShorterWindowsPath();
+
+                    string url = CssParser.MakeUrl(contextUrl, localPath);
+                    string shorterLocation = CssParser.ChangeUrlToWindowsPath(url, );
+
+                    fileBinding.Url = url;
+
+                    fileBinding.FileLocation = localPath;
                     fileBinding.Domain = Domain;
 
                     fileBinding.Downloading = 0;
@@ -124,9 +178,9 @@ namespace WebScraper
                         MainBinding.FileBindings.Add(fileBinding);
                 }
             }
-        }
+        }*/
 
-        public HtmlNodeCollection GetImgLinkScriptNodesFromHtml(string htmlContent)
+        /*public HtmlNodeCollection GetImgLinkScriptNodesFromHtml(string htmlContent)
         {
             HtmlDocument htmlDocument = new HtmlDocument();
             htmlDocument.LoadHtml(htmlContent);
@@ -137,21 +191,24 @@ namespace WebScraper
 
         public async Task DownloadAllResources()
         {
+            WebClients.Clear();
             foreach (FileBinding file in MainBinding.FileBindings)
             {
                 DownloadResource(file);
             }
+
 
         }
 
         public async Task DownloadResource(FileBinding file)
         {
             if (file.Downloading == 100 || file.Error != null)
-                return;
+                return ;
             try
             {
                 using (WebClient client = new WebClient())
                 {
+                    WebClients.Add(client);
                     client.DownloadProgressChanged += (sender, e) =>
                     {
                         file.Downloading = e.ProgressPercentage;
@@ -159,42 +216,34 @@ namespace WebScraper
                     };
 
                     if (file.Url == null)
-                        return;
+                        return ;
 
-                    Uri uri = new Uri(file.Url);
+                    
+                    string path = CssParser.ChangeUrlToWindowsPath(file.Url, file.Domain);
 
-                    string localPath = uri.LocalPath.Replace("/", "\\");
+                    Directory.CreateDirectory(Path.GetDirectoryName(path));
 
-                    string currentDirectory = $"C:\\webscraper\\{file.Domain}\\";
-
-                    if (MainBinding.ServerPaths && localPath.Length > 100)
-                        localPath = localPath.MakeShorterPath();
-
-                    string combinedPath = currentDirectory + localPath;
-
-                    combinedPath = combinedPath.Replace("\\\\", "\\");
-
-                    if (MainBinding.ServerPaths)
-                        file.Path = $"http://{file.Domain}" + localPath;
-                    else
-                        file.Path = combinedPath;
-
-                    Directory.CreateDirectory(Path.GetDirectoryName(combinedPath));
-
-                    if (combinedPath.EndsWith(".css") || combinedPath.EndsWith(".min"))
+                    if (path.EndsWith(".css") || path.EndsWith(".min"))
                     {
-                        string cssContent = await client.DownloadStringTaskAsync(combinedPath);
-                        IndexCssContent(cssContent, file.Url);
-                        File.WriteAllText(combinedPath, cssContent);
+                        
+
+                        string cssContent = await client.DownloadStringTaskAsync(file.Url);
+                        await IndexCssContent(cssContent, file.Url);
+                        File.WriteAllText(path, cssContent);
                     }
-                    else {
-                        await client.DownloadFileTaskAsync(file.Url, combinedPath);
+                    else
+                    {
+                        await client.DownloadFileTaskAsync(file.Url, path);
 
                     }
+
+                    *//*string content = await client.DownloadStringTaskAsync(file.Url);
+                    File.WriteAllText(combinedPath, content);*//*
 
 
                     MainBinding.DownloadSuccess += 1;
                     CalculateTotalProgress();
+
                 }
             }
             catch (Exception e)
@@ -205,26 +254,67 @@ namespace WebScraper
             }
         }
 
-        public void IndexCssContent(string cssContent, string url)
+       
+        public async Task IndexCssContent(string cssContent, string contextUrl)
         {
-            List<string> resourceUrls = CssParser.getCssUrls(cssContent);
+            List<string> resourceUrls = CssParser.getCssUrls(cssContent, contextUrl);
 
-            foreach (string resourceUrl in resourceUrls) {
-                if (!string.IsNullOrEmpty(resourceUrl))
+            foreach (string localPath in resourceUrls) {
+                if (!string.IsNullOrEmpty(localPath))
                 {
                     FileBinding fileBinding = new FileBinding();
-                    fileBinding.Url = url + resourceUrl;
 
-                    fileBinding.FileName = resourceUrl;
+                    // Parse the URL
+                    string url = CssParser.MakeUrl(contextUrl, localPath);
+                    //Uri uri = new Uri("https://akademiabialska.pl" + resourceUrl);
+
+                    // Get the URL without the query string
+                    //string cleanedUrl = $"{uri.Scheme}://{uri.Host}{uri.AbsolutePath}";
+                    fileBinding.Url = url;
+
+
+
+                    fileBinding.FileLocation = localPath;
                     fileBinding.Domain = Domain;
 
                     fileBinding.Downloading = 0;
 
-                    if (!MainBinding.FileBindings.Contains(fileBinding))
+                    if (!FileBindingsContains(fileBinding)) {
                         MainBinding.FileBindings.Add(fileBinding);
+                        await DownloadResource(fileBinding);
+                    }
+                    else
+                        Console.WriteLine("");
                 }
             }
                 
+        }*/
+
+        /*public async Task DownloadCssResources(string cssContent, string url) {
+            List<string> resourceUrls = CssParser.getCssUrls(cssContent);
+
+            foreach (string resourceUrl in resourceUrls) {
+                DownloadResource();
+
+            }
+
+        }*/
+
+        public bool FileBindingsContains(FileBinding element)
+        {
+            foreach (FileBinding file in MainBinding.FileBindings)
+            {
+                if (element.Url.Equals(file.Url))
+                    return true;
+            }
+            return false;
+        }
+        public void StopDownloading()
+        {
+            foreach (WebScrapper scrapper in WebScrappers)
+            {
+                scrapper.Client.CancelAsync();
+            }
         }
 
         public void CalculateTotalProgress()

@@ -30,13 +30,13 @@ namespace WebScraper
         }
 
         private string _fileName;
-        public string FileName
+        public string FileLocation
         {
             get { return _fileName; }
             set
             {
                 _fileName = value;
-                OnPropertyChanged(nameof(FileName));
+                OnPropertyChanged(nameof(FileLocation));
             }
         }
 
@@ -100,7 +100,7 @@ namespace WebScraper
         public override bool Equals(object obj)
         {
             return obj is FileBinding binding &&
-                   Url == binding.Url;
+                   Url.Equals(binding.Url);
         }
     }
 }
