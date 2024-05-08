@@ -23,36 +23,38 @@ namespace WebScraper
     public partial class MainWindow : Window
     {
         public MainBinding MainBinding;
+        public DownloadService DownloadService;
         public MainWindow()
         {
             InitializeComponent();
-
+            //LocalHttpServer.Start();
             MainBinding = new MainBinding();
 
             DataContext = MainBinding;
 
             List<string> urls = new List<string> { "https://akademiabialska.pl", "https://akademiabialska.pl/aktualnosci/x-ogolnopolska-konferencja-studenckich-kol-naukowych-151.html", "https://rekrutacja.akademiabialska.pl/aktualnosci/fotorelacja-z-dnia-otwartego-2024-12.html" };
-
+            //https://rekrutacja.akademiabialska.pl/oferta/informatyka-3.html
             MainBinding.Urls = string.Join("\r\n\r\n", urls);
             MainBinding.Domain = "alamakota.pl";
 
-            DownloadService downloadService = new DownloadService(MainBinding);
-            downloadService.Start();
-            /*downloadService.IndexAndDownloadAllUrls();
-            downloadService.DownloadAllResources();*/
-            /* WebScrapper web = new WebScrapper(mainBinding, "https://akademiabialska.pl", "alamakota.pl");
-             web.DownloadAndIndexReosurces();
-
-             WebScrapper web1 = new WebScrapper(mainBinding, "https://akademiabialska.pl/aktualnosci/x-ogolnopolska-konferencja-studenckich-kol-naukowych-151.html", "alamakota.pl");
-             web1.DownloadAndIndexReosurces();
-
-             WebScrapper web2 = new WebScrapper(mainBinding, "https://rekrutacja.akademiabialska.pl/aktualnosci/fotorelacja-z-dnia-otwartego-2024-12.html", "alamakota.pl");
-             web2.DownloadAndIndexReosurces();*/
-
-            //web2.DownloadAllResources();
+            DownloadService = new DownloadService(MainBinding);
+          
         }
 
+        public void StartClicked(object sender, RoutedEventArgs e) {
+            DownloadService.Start();
 
+        }
+
+        public void StopClicked(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        public void ContinueClicked(object sender, RoutedEventArgs e)
+        {
+
+        }
 
 
     }

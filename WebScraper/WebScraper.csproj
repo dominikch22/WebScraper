@@ -58,9 +58,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="CssParser.cs" />
     <Compile Include="DownloadResourceTask.cs" />
     <Compile Include="DownloadService.cs" />
     <Compile Include="HtmlContent.cs" />
+    <Compile Include="LocalHttpServer.cs" />
     <Compile Include="StringExtension.cs" />
     <Compile Include="WebScrapper.cs" />
     <Page Include="MainWindow.xaml">

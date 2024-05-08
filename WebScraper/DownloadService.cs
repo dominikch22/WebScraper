@@ -60,6 +60,30 @@ namespace WebScraper
                     string content = await response.Content.ReadAsStringAsync();
                     file.Size = response.Content.Headers.ContentLength.Value;
 
+                    Uri uri = new Uri(file.Url);
+
+                    string localPath = uri.LocalPath.Replace("/", "\\");
+                    if (localPath.Equals("\\"))
+                        localPath = "\\index.html";
+
+                    string currentDirectory = $"C:\\webscraper\\{file.Domain}\\";
+
+                    if (MainBinding.ServerPaths && localPath.Length > 100)
+                        localPath = localPath.MakeShorterPath();
+
+                    string combinedPath = currentDirectory + localPath;
+
+                    combinedPath = combinedPath.Replace("\\\\", "\\");
+
+                    if (MainBinding.ServerPaths)
+                        file.Path = $"http://{file.Domain}" + localPath;
+                    else
+                        file.Path = combinedPath;
+
+                    Directory.CreateDirectory(Path.GetDirectoryName(combinedPath));
+
+                    File.WriteAllText(combinedPath, content);
+
                     return content;
                 }
             }
@@ -92,6 +116,7 @@ namespace WebScraper
                     fileBinding.Url = url + resourceUrl;
 
                     fileBinding.FileName = resourceUrl;
+                    fileBinding.Domain = Domain;
 
                     fileBinding.Downloading = 0;
 
@@ -116,6 +141,7 @@ namespace WebScraper
             {
                 DownloadResource(file);
             }
+
         }
 
         public async Task DownloadResource(FileBinding file)
@@ -155,7 +181,17 @@ namespace WebScraper
 
                     Directory.CreateDirectory(Path.GetDirectoryName(combinedPath));
 
-                    await client.DownloadFileTaskAsync(file.Url, combinedPath);
+                    if (combinedPath.EndsWith(".css") || combinedPath.EndsWith(".min"))
+                    {
+                        string cssContent = await client.DownloadStringTaskAsync(combinedPath);
+                        IndexCssContent(cssContent, file.Url);
+                        File.WriteAllText(combinedPath, cssContent);
+                    }
+                    else {
+                        await client.DownloadFileTaskAsync(file.Url, combinedPath);
+
+                    }
+
 
                     MainBinding.DownloadSuccess += 1;
                     CalculateTotalProgress();
@@ -167,6 +203,28 @@ namespace WebScraper
 
                 file.Error = e.Message;
             }
+        }
+
+        public void IndexCssContent(string cssContent, string url)
+        {
+            List<string> resourceUrls = CssParser.getCssUrls(cssContent);
+
+            foreach (string resourceUrl in resourceUrls) {
+                if (!string.IsNullOrEmpty(resourceUrl))
+                {
+                    FileBinding fileBinding = new FileBinding();
+                    fileBinding.Url = url + resourceUrl;
+
+                    fileBinding.FileName = resourceUrl;
+                    fileBinding.Domain = Domain;
+
+                    fileBinding.Downloading = 0;
+
+                    if (!MainBinding.FileBindings.Contains(fileBinding))
+                        MainBinding.FileBindings.Add(fileBinding);
+                }
+            }
+                
         }
 
         public void CalculateTotalProgress()
