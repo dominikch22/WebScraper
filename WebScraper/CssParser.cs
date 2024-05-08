@@ -94,7 +94,7 @@ namespace WebScraper
             string[] absultePath = uri.AbsolutePath.Split('/');
             string loweredAbsolutePath = "";
 
-            for (int i = 0; i < absultePath.Length - 1; i++) {
+            for (int i = 0; i < absultePath.Length - 2; i++) {
                 loweredAbsolutePath += "/" + absultePath[i];
             }
 

@@ -57,7 +57,16 @@ namespace WebScraper
             {
                 WebScrapper webScrapper = new WebScrapper(MainBinding, file.Url, file.Domain);
                 WebScrappers.Add(webScrapper);
-                await webScrapper.DownloadResource(file);
+                webScrapper.DownloadResource(file);
+
+            }
+            await Task.Delay(2000);
+            foreach (FileBinding file in MainBinding.FileBindings)
+            {
+                WebScrapper webScrapper = new WebScrapper(MainBinding, file.Url, file.Domain);
+                WebScrappers.Add(webScrapper);
+                webScrapper.DownloadResource(file);
+
             }
         }
         /* public async Task Start() {

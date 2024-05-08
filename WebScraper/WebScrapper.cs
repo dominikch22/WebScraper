@@ -124,6 +124,9 @@ namespace WebScraper
                 }
             }
 
+            MainBinding.FilesCount = MainBinding.FileBindings.Count;
+
+
             string windowspHtlmPath = CssParser.ChangeUrlToWindowsPath(Url, Domain);
             Directory.CreateDirectory(Path.GetDirectoryName(windowspHtlmPath));
             htmlDocument.Save(windowspHtlmPath);
@@ -147,15 +150,11 @@ namespace WebScraper
                     {
                         file.Downloading = e.ProgressPercentage;
                         file.Size = e.TotalBytesToReceive;
-                    };
-
-                    if (file.Url == null)
-                        return;
-
+                    };                  
 
                     string path = CssParser.ChangeUrlToWindowsPath(file.Url, file.Domain);
 
-                    Directory.CreateDirectory(Path.GetDirectoryName(path));
+                    Directory.CreateDirectory(Path.GetDirectoryName(file.FileLocation));
 
                     if (path.EndsWith(".css") || path.EndsWith(".min"))
                     {
@@ -179,6 +178,11 @@ namespace WebScraper
                     CalculateTotalProgress();
 
                 }
+            }
+            catch (ArgumentException e)
+            {
+                file.Error = e.Message;
+
             }
             catch (Exception e)
             {
@@ -210,8 +214,9 @@ namespace WebScraper
 
 
 
-                    fileBinding.FileLocation = localPath;
                     fileBinding.Domain = Domain;
+                    fileBinding.FileLocation = CssParser.ChangeUrlToWindowsPath(url, fileBinding.Domain); ;
+
 
                     fileBinding.Downloading = 0;
 
@@ -224,6 +229,8 @@ namespace WebScraper
                         Console.WriteLine("");
                 }
             }
+
+            MainBinding.FilesCount = MainBinding.FileBindings.Count;
 
         }
 
@@ -242,7 +249,8 @@ namespace WebScraper
                 else
                     sum += (double)file.Downloading / 100;
             }
-            MainBinding.TotalProgressBar = (int)(count / sum) * 100;
+            double progress = (sum / count) * 100;
+            MainBinding.TotalProgressBar = (int)progress;
         }
 
 

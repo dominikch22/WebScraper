@@ -125,6 +125,20 @@ namespace WebScraper
                 
             }
         }
+
+        private int _filesCount;
+
+        public int FilesCount
+        {
+            get { return _filesCount; }
+            set
+            {
+                
+                    _filesCount = value;
+                    OnPropertyChanged(nameof(FilesCount));
+                
+            }
+        }
         public MainBinding()
         {
             Urls = "";

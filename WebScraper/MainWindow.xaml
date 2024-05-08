@@ -96,7 +96,7 @@
                 <Run Text="{Binding DownloadFailure}"/>
                 <Run Text=")"/>
                 <Run Text=" z "/>
-                <Run Text="49"/>
+                <Run Text="{Binding FilesCount}"/>
 
 
 
