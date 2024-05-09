@@ -23,7 +23,7 @@ namespace WebScraper
             List<string> urls = new List<string> { "https://akademiabialska.pl" };
 
             MainBinding.Urls = string.Join("\r\n\r\n", urls);
-            MainBinding.Domain = "http://kott.pl";
+            MainBinding.Domain = "http://localhost:8080";
 
             DownloadService = new DownloadService(MainBinding);
 

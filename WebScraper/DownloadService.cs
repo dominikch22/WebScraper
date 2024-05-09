@@ -1,6 +1,7 @@
 ﻿using HtmlAgilityPack;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -78,18 +79,21 @@ namespace WebScraper
             }
 
             await Task.WhenAll(tasks);
-            await Task.Delay(2000);
+            await Task.Delay(2500);
             MainBinding.TotalProgressBar = 100;
-            
-            
-          /*  var continuation = Task.Factory.ContinueWhenAll(
-                    tasks.ToArray(),
-                    task => {
-                        MainBinding.TotalProgressBar = 100; 
-                    }
-                );
-            continuation.Start();
-*/
+
+            string folderPath = $"C:\\webscraper\\{PathOperation.GetFolderFromDomain(Domain)}\\";
+            Process.Start(folderPath);
+
+
+            /*  var continuation = Task.Factory.ContinueWhenAll(
+                      tasks.ToArray(),
+                      task => {
+                          MainBinding.TotalProgressBar = 100; 
+                      }
+                  );
+              continuation.Start();
+  */
 
 
             /* await Task.WhenAll(tasks)

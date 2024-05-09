@@ -21,13 +21,13 @@ namespace WebScraper
                 url += "/index.html";
             }
 
-            if (url.EndsWith(".php"))
+            else if (url.EndsWith(".php"))
             {
                 url = url.Substring(0, url.Length - 3);
                 url = url + "html";
             }
 
-            if (!uri.AbsolutePath.Contains("."))
+            else if (!uri.AbsolutePath.Contains("."))
             {
                 url = url + ".html";
             }

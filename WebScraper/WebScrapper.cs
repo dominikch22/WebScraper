@@ -4,10 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Http;
-using System.Security.Policy;
 using System.Threading.Tasks;
-using System.Windows.Controls;
-using System.Windows.Shapes;
 using Path = System.IO.Path;
 
 namespace WebScraper
@@ -33,10 +30,10 @@ namespace WebScraper
         public async Task IndexAndDownload()
         {
             string content = await DownloadHtml();
-            if(!content.Equals(""))
+            if (!content.Equals(""))
                 IndexResources(content);
 
-            
+
         }
 
         public async Task<string> DownloadHtml()
@@ -61,7 +58,8 @@ namespace WebScraper
                         file.Error = "Empty reposnse";
 
                     }
-                    else {
+                    else
+                    {
                         file.Downloading = 100;
                     }
 
@@ -78,7 +76,8 @@ namespace WebScraper
             }
         }
 
-        public void ReplaceHyperLinks(HtmlDocument htmlDocument) {
+        public void ReplaceHyperLinks(HtmlDocument htmlDocument)
+        {
             var nodes = htmlDocument.DocumentNode.SelectNodes("//a[@href]");
 
             if (nodes != null)
@@ -86,11 +85,12 @@ namespace WebScraper
                 foreach (var node in nodes)
                 {
                     string url = node.GetAttributeValue("href", null);
-                    if (url.StartsWith("http")) {
+                    if (url.StartsWith("http"))
+                    {
                         Uri uri = new Uri(url);
                         node.SetAttributeValue("href", Domain + uri.AbsolutePath);
                     }
-                    
+
                 }
             }
         }
@@ -107,7 +107,7 @@ namespace WebScraper
                     Uri uri = new Uri(srcValue);
                     string newSrcValue = srcValue.Replace($"{uri.Scheme}:{uri.Host}", "");
                     imgNode.SetAttributeValue("src", newSrcValue);
-                  
+
                 }
             }
         }
@@ -179,13 +179,14 @@ namespace WebScraper
                 Directory.CreateDirectory(Path.GetDirectoryName(windowspHtlmPath));
                 htmlDocument.Save(windowspHtlmPath);
             }
-            catch (Exception e) { 
-            
+            catch (Exception e)
+            {
+
             }
-           
+
         }
 
-      
+
         public async Task DownloadResource(FileBinding file)
         {
             lock (MainBinding._locker)
@@ -201,36 +202,58 @@ namespace WebScraper
                     Client.DownloadProgressChanged += (sender, e) =>
                     {
                         file.Downloading = e.ProgressPercentage;
-                        file.Size = e.TotalBytesToReceive;                     
+                        file.Size = e.TotalBytesToReceive;
                     };
 
-                    /*Client.DownloadFileCompleted += (sender, e) =>
+                    Client.DownloadFileCompleted += (sender, e) =>
                     {
                         if(file.Error == null && file.Size > -1)
                             file.Downloading = 100;
-                    };*/
+                    };
 
 
                     string path = PathOperation.ChangeUrlToWindowsPath(file.Url, PathOperation.GetFolderFromDomain(file.Domain));
 
                     Directory.CreateDirectory(Path.GetDirectoryName(file.FileLocation));
 
-                    string content = await Client.DownloadStringTaskAsync(file.Url);
-                    if (file.Size < 1 || content.Length == 0)
+
+
+                    if (path.EndsWith(".css") || path.EndsWith(".min"))
                     {
-                        file.Error = "Empty reponse";
+                        string content = await Client.DownloadStringTaskAsync(file.Url);
+                        file.Size = content.Length;
+                        file.Downloading = 100;
+
+                        /* if (file.Size < 1 || content.Length == 0)
+                         {
+                             file.Error = "Empty reponse";
+
+                         }*/
+                        await IndexCssContent(content, file.Url);
+                    }
+                    else
+                    {
+                        byte[] content = await Client.DownloadDataTaskAsync(file.Url);
+                        file.Size = content.Length;
+                        file.Downloading = 100;
+
+                        /* if (file.Size < 1)
+                         {
+                             file.Error = "Empty reponse";
+
+                         }
+                         else {
+                             file.Error = null;
+
+                         }*/
+                        File.WriteAllBytes(file.FileLocation, content);
 
                     }
-                    else {
-                        if (path.EndsWith(".css") || path.EndsWith(".min"))
-                        {
-                            await IndexCssContent(content, file.Url);
-                        }
 
-                        File.WriteAllText(file.FileLocation, content);
-                    }
+                    
 
-                   
+
+
 
 
 
@@ -274,14 +297,15 @@ namespace WebScraper
 
                     fileBinding.Downloading = 0;
 
-                    lock (MainBinding._locker) {
+                    lock (MainBinding._locker)
+                    {
                         if (!MainBinding.FileBindings.Contains(fileBinding))
                         {
                             MainBinding.FileBindings.Add(fileBinding);
                         }
                     }
-                    
-                    
+
+
                 }
             }
 
@@ -299,7 +323,8 @@ namespace WebScraper
 
         public void CalculateTotalProgress()
         {
-            lock (MainBinding._locker) {
+            lock (MainBinding._locker)
+            {
                 int count = MainBinding.FileBindings.Count;
                 int sum = 0;
 
@@ -319,7 +344,7 @@ namespace WebScraper
                     MainBinding.Running = false;
                 MainBinding.TotalProgressBar = (int)progress;
             }
-            
+
         }
 
 
