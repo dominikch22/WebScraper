@@ -33,21 +33,19 @@ namespace WebScraper
         public async Task IndexAndDownload()
         {
             string content = await DownloadHtml();
-            IndexResources(content);
+            if(!content.Equals(""))
+                IndexResources(content);
 
             
         }
 
         public async Task<string> DownloadHtml()
         {
-            FileBinding file = new FileBinding(Url, 0, 100, Domain);
-            lock (MainBinding._locker)
-            {
-                if (!MainBinding.FileBindings.Contains(file))
-                    MainBinding.FileBindings.Add(file);
-                else
-                    Console.WriteLine("");
-            }
+            FileBinding file = new FileBinding(Url, 0, 0, Domain);
+            if (!MainBinding.FileBindings.Contains(file))
+                MainBinding.FileBindings.Push(file);
+            else
+                return "";
             try
             {
                 using (HttpClient client = new HttpClient())
@@ -58,7 +56,14 @@ namespace WebScraper
                     string content = await response.Content.ReadAsStringAsync();
                     file.Size = response.Content.Headers.ContentLength.Value;
 
-                    
+                    if (response.Content.Headers.ContentLength.Value == 0)
+                    {
+                        file.Error = "Empty reposnse";
+
+                    }
+                    else {
+                        file.Downloading = 100;
+                    }
 
                     return content;
                 }
@@ -66,6 +71,9 @@ namespace WebScraper
             catch (Exception ex)
             {
                 file.Error = ex.Message;
+
+                /*lock (MainBinding._locker) {
+                }*/
                 return "";
             }
         }
@@ -106,69 +114,75 @@ namespace WebScraper
 
         public void IndexResources(string content)
         {
-
-            HtmlDocument htmlDocument = new HtmlDocument();
-            htmlDocument.LoadHtml(content);
-
-            ReplaceHyperLinks(htmlDocument);
-            //RemoveHttpLocationFromImages(htmlDocument);
-
-            HtmlNodeCollection nodes = htmlDocument.DocumentNode.SelectNodes("//img|//link|//script");
-
-
-            string localPath = null;
-            string atrributeName = "";
-            foreach (HtmlNode node in nodes)
+            try
             {
-                if (node.Name == "img" || node.Name == "script")
+                HtmlDocument htmlDocument = new HtmlDocument();
+                htmlDocument.LoadHtml(content);
+
+                ReplaceHyperLinks(htmlDocument);
+                //RemoveHttpLocationFromImages(htmlDocument);
+
+                HtmlNodeCollection nodes = htmlDocument.DocumentNode.SelectNodes("//img|//link|//script");
+
+
+                string localPath = null;
+                string atrributeName = "";
+                foreach (HtmlNode node in nodes)
                 {
-                    localPath = node.GetAttributeValue("src", null);
-                    atrributeName = "src";
-                    
-                }
-                else if (node.Name == "link")
-                {
-                    localPath = node.GetAttributeValue("href", null);
-                    atrributeName = "href";
-
-                }
-
-
-                if (!string.IsNullOrEmpty(localPath))
-                {
-                    FileBinding fileBinding = new FileBinding();
-                    string url = PathOperation.MakeUrl(Url, localPath);
-
-                    string shorterLocalPath = PathOperation.MakeShorterLocalPath(localPath);
-                    node.SetAttributeValue(atrributeName, shorterLocalPath);
-
-                    string windowsPath = PathOperation.ChangeUrlToWindowsPath(url, PathOperation.GetFolderFromDomain(Domain));
-                    string shorterWindowsPath = PathOperation.MakeShorterWindowsPath(windowsPath);
-
-
-                    fileBinding.Url = url;
-                    fileBinding.FileLocation = shorterWindowsPath;
-                    fileBinding.Domain = Domain;
-                    fileBinding.Downloading = 0;
-
-                    lock (MainBinding._locker)
+                    if (node.Name == "img" || node.Name == "script")
                     {
-                        if (!MainBinding.FileBindings.Contains(fileBinding))
+                        localPath = node.GetAttributeValue("src", null);
+                        atrributeName = "src";
+
+                    }
+                    else if (node.Name == "link")
+                    {
+                        localPath = node.GetAttributeValue("href", null);
+                        atrributeName = "href";
+
+                    }
+
+
+                    if (!string.IsNullOrEmpty(localPath))
+                    {
+                        FileBinding fileBinding = new FileBinding();
+                        string url = PathOperation.MakeUrl(Url, localPath);
+
+                        string shorterLocalPath = PathOperation.MakeShorterLocalPath(localPath);
+                        node.SetAttributeValue(atrributeName, shorterLocalPath);
+
+                        string windowsPath = PathOperation.ChangeUrlToWindowsPath(url, PathOperation.GetFolderFromDomain(Domain));
+                        string shorterWindowsPath = PathOperation.MakeShorterWindowsPath(windowsPath);
+
+
+                        fileBinding.Url = url;
+                        fileBinding.FileLocation = shorterWindowsPath;
+                        fileBinding.Domain = Domain;
+                        fileBinding.Downloading = 0;
+
+                        lock (MainBinding._locker)
                         {
-                            MainBinding.FileBindings.Add(fileBinding);
+                            if (!MainBinding.FileBindings.Contains(fileBinding))
+                            {
+                                MainBinding.FileBindings.Add(fileBinding);
+                            }
                         }
                     }
                 }
-            }
-            lock (MainBinding._locker)
-            {
-                MainBinding.FilesCount = MainBinding.FileBindings.Count;
+                lock (MainBinding._locker)
+                {
+                    MainBinding.FilesCount = MainBinding.FileBindings.Count;
 
-            }
-            string windowspHtlmPath = PathOperation.ChangeUrlToWindowsPath(Url, PathOperation.GetFolderFromDomain(Domain));
+                }
+                string windowspHtlmPath = PathOperation.ChangeUrlToWindowsPath(Url, PathOperation.GetFolderFromDomain(Domain));
 
-            Directory.CreateDirectory(Path.GetDirectoryName(windowspHtlmPath));
-            htmlDocument.Save(windowspHtlmPath);
+                Directory.CreateDirectory(Path.GetDirectoryName(windowspHtlmPath));
+                htmlDocument.Save(windowspHtlmPath);
+            }
+            catch (Exception e) { 
+            
+            }
+           
         }
 
       
@@ -201,17 +215,23 @@ namespace WebScraper
 
                     Directory.CreateDirectory(Path.GetDirectoryName(file.FileLocation));
 
-                    if (path.EndsWith(".css") || path.EndsWith(".min"))
+                    string content = await Client.DownloadStringTaskAsync(file.Url);
+                    if (file.Size < 1 || content.Length == 0)
                     {
-                        string cssContent = await Client.DownloadStringTaskAsync(file.Url);
-                        await IndexCssContent(cssContent, file.Url);
-                        File.WriteAllText(file.FileLocation, cssContent);
-                    }
-                    else
-                    {
-                        await Client.DownloadFileTaskAsync(file.Url, file.FileLocation);
+                        file.Error = "Empty reponse";
 
                     }
+                    else {
+                        if (path.EndsWith(".css") || path.EndsWith(".min"))
+                        {
+                            await IndexCssContent(content, file.Url);
+                        }
+
+                        File.WriteAllText(file.FileLocation, content);
+                    }
+
+                   
+
 
 
                     CalculateTotalProgress();
@@ -220,16 +240,13 @@ namespace WebScraper
             }
             catch (Exception e)
             {
-                lock (MainBinding._locker)
-                {
-                    file.Error = e.Message;
+                file.Error = e.Message;
 
-                    if (e.Message.Contains("The request was aborted"))
-                    {
-                        file.Error = null;
-                    }
+                if (e.Message.Contains("The request was aborted"))
+                {
+                    file.Error = null;
                 }
-                    
+
             }
         }
 

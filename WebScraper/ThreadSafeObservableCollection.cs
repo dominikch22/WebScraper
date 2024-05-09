@@ -11,36 +11,45 @@ namespace WebScraper
     {
         private readonly object _lock = new object();
 
-        protected override void InsertItem(int index, T item)
+        public void Push(T item)
         {
             lock (_lock)
             {
-                base.InsertItem(index, item);
+                base.Add(item);
             }
         }
 
-        protected override void RemoveItem(int index)
-        {
-            lock (_lock)
-            {
-                base.RemoveItem(index);
-            }
-        }
+        /* protected override void InsertItem(int index, T item)
+         {
+             lock (_lock)
+             {
+                 base.InsertItem(index, item);
+                     }
+         }
 
-        protected override void SetItem(int index, T item)
-        {
-            lock (_lock)
-            {
-                base.SetItem(index, item);
-            }
-        }
+         protected override void RemoveItem(int index)
+         {
+             lock (_lock)
+             {
+                 base.RemoveItem(index);
+             }
+         }
 
-        protected override void ClearItems()
-        {
-            lock (_lock)
-            {
-                base.ClearItems();
-            }
-        }
+         protected override void SetItem(int index, T item)
+         {
+             lock (_lock)
+             {
+                 base.SetItem(index, item);
+             }
+         }
+
+         protected override void ClearItems()
+         {
+             lock (_lock)
+             {
+                 base.ClearItems();
+             }
+         }
+     */
     }
 }
