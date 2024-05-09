@@ -35,9 +35,9 @@
             <TextBox Grid.Row="3" Margin="10" Text="{Binding Domain, Mode=TwoWay}"></TextBox>
             
             <StackPanel Grid.Row="4" Margin="5" HorizontalAlignment="Right" Orientation="Horizontal">
-                <Button Content="Start" Click="StartClicked" Name="btnStart" Margin="5"/>
+                <Button Content="Start/Nowe" Click="StartClicked" Name="btnStart" Margin="5"/>
                 <Button Content="Stop" Click="StopClicked" Name="btnStop" Margin="5"/>
-                <Button Content="Kontynuje" Click="ContinueClicked" Name="btnContinue" Margin="5"/>
+                <Button Content="Wznów" Click="ContinueClicked" Name="btnContinue" Margin="5"/>
             </StackPanel>
 
             <TextBlock  Margin="10" Grid.Row="5" TextWrapping="Wrap" Text="{Binding Error}"></TextBlock>
@@ -72,6 +72,11 @@
                                             <Run Text="Pobieranie: "/>
                                             <Run Text="{Binding Downloading}"/>
                                             <Run Text=" %"/>
+
+                                        </TextBlock>
+                                        <TextBlock>
+                                             <Run Text="sciezka: "/>
+                                             <Run Text="{Binding FileLocation}"/>
 
                                         </TextBlock>
                                         <TextBlock Text="{Binding Error}" TextWrapping="Wrap" Foreground="Red"/>

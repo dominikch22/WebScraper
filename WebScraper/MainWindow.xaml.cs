@@ -32,29 +32,37 @@ namespace WebScraper
             MainBinding = new MainBinding();
 
             DataContext = MainBinding;
+            
+            BindingOperations.EnableCollectionSynchronization(MainBinding.FileBindings, MainBinding._locker);
+
 
             List<string> urls = new List<string> { "https://akademiabialska.pl"};
-            //https://rekrutacja.akademiabialska.pl/oferta/informatyka-3.html
-            //, "https://akademiabialska.pl/aktualnosci/x-ogolnopolska-konferencja-studenckich-kol-naukowych-151.html", "https://rekrutacja.akademiabialska.pl/aktualnosci/fotorelacja-z-dnia-otwartego-2024-12.html" 
+            
             MainBinding.Urls = string.Join("\r\n\r\n", urls);
-            MainBinding.Domain = "kott";
+            MainBinding.Domain = "http://kott.pl";
 
-          
+            DownloadService = new DownloadService(MainBinding);
+
+
+
         }
 
         public void StartClicked(object sender, RoutedEventArgs e) {
             try {
-                if (!MainBinding.Running)
-                {
-                    MainBinding.FileBindings = new ObservableCollection<FileBinding>();
+                MainBinding.Running = false;
+                DownloadService.StopDownloading();
+
+                
                     DownloadService = new DownloadService(MainBinding);
+
+                    MainBinding.FileBindings.Clear(); 
                     DownloadService.Start();
                     MainBinding.Running = true;
 
                     LocalHttpServer.Start(PathOperation.GetFolderFromDomain(MainBinding.Domain));
 
                     MainBinding.Error = "";
-                }
+                
 
             }catch (Exception ex)
             {
@@ -75,12 +83,14 @@ namespace WebScraper
 
         public void ContinueClicked(object sender, RoutedEventArgs e)
         {
-            if (!MainBinding.Running)
-            {
+
+            MainBinding.Running = false;
+            DownloadService.StopDownloading();
+           
                 DownloadService = new DownloadService(MainBinding);
                 DownloadService.Start();
                 MainBinding.Running = true;
-            }
+            
         }
 
 

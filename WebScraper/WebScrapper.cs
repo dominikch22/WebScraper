@@ -129,10 +129,8 @@ namespace WebScraper
 
 
                     fileBinding.Url = url;
-
                     fileBinding.FileLocation = shorterWindowsPath;
                     fileBinding.Domain = Domain;
-
                     fileBinding.Downloading = 0;
 
                     lock (MainBinding._locker)
@@ -161,7 +159,7 @@ namespace WebScraper
             lock (MainBinding._locker)
             {
                 file.Error = null;
-                if (file.Downloading == 100)
+                if (file.Downloading == 100 && file.Size != -1)
                     return;
             }
             try
@@ -172,7 +170,13 @@ namespace WebScraper
                     {
                         file.Downloading = e.ProgressPercentage;
                         file.Size = e.TotalBytesToReceive;
-                    };                  
+                        
+                    };
+
+                    Client.DownloadStringCompleted += (sender, e) =>
+                    {
+                        file.Downloading = 100;
+                    };
 
                     string path = PathOperation.ChangeUrlToWindowsPath(file.Url, PathOperation.GetFolderFromDomain(file.Domain));
 
@@ -267,7 +271,7 @@ namespace WebScraper
                 MainBinding.DownloadSuccess = 0;
                 foreach (var file in MainBinding.FileBindings)
                 {
-                    if (file.Error != null)
+                    if (file.Error != null || file.Size == -1)
                         MainBinding.DownloadFailure += 1;
                     if (file.Downloading == 100)
                         MainBinding.DownloadSuccess += 1;

@@ -119,7 +119,15 @@ namespace WebScraper
             for (int i = 0; i < directories.Length - 1; i++)
             {
                 if (directories[i].Length > 36)
-                    directories[i] = GenerateRandomDirectoryName(7);
+                    directories[i] = directories[i].Substring(0, Math.Min(directories[i].Length, 10));//GenerateRandomDirectoryName(7);
+            }
+
+            string fileName = directories[directories.Length - 1];
+            if (fileName.Length > 25)
+            {
+                directories[directories.Length - 1] =
+                    fileName.Substring(0, Math.Min(fileName.Length, 10)) +
+                    fileName.Substring(Math.Max(0, fileName.Length - 5)); ;
             }
 
             string shortenedPath = string.Join("\\", directories);
@@ -134,8 +142,11 @@ namespace WebScraper
             for (int i = 0; i < directories.Length - 1; i++)
             {
                 if (directories[i].Length > 25)
-                    directories[i] = GenerateRandomDirectoryName(7);
+                    directories[i] = directories[i].Substring(0, Math.Min(directories[i].Length, 10)); //GenerateRandomDirectoryName(7);
             }
+
+            
+
 
             string shortenedPath = string.Join("/", directories);
             return shortenedPath;

@@ -1,76 +1,45 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Windows.Data;
 
 namespace WebScraper
 {
     public class MainBinding : INotifyPropertyChanged
     {
 
-        public static readonly object _locker = new object();
+        public static object _locker = new object();
 
         private string _urls;
         public string Urls
         {
-            get
-            {
-                lock (_locker)
-                {
-                    return _urls;
-                }
-            }
+            get { return _urls; }
             set
             {
-                lock (_locker)
-                {
-                    _urls = value;
-                }
+                _urls = value;
                 OnPropertyChanged(nameof(Urls));
-
             }
         }
 
 
-        private ObservableCollection<FileBinding> _fileBindings;
-        public ObservableCollection<FileBinding> FileBindings
+        private ThreadSafeObservableCollection<FileBinding> _fileBindings;
+        public ThreadSafeObservableCollection<FileBinding> FileBindings
         {
-            get
-            {
-                lock (_locker)
-                {
-                    return _fileBindings;
-                }
-            }
+            get { return _fileBindings; }
             set
             {
-                lock (_locker)
-                {
-                    _fileBindings = value;
-
-                }
+                _fileBindings = value;
                 OnPropertyChanged(nameof(FileBindings));
-
             }
         }
 
         private int _totalProgressBar;
         public int TotalProgressBar
         {
-            get
-            {
-                lock (_locker)
-                {
-                    return _totalProgressBar;
-                }
-            }
+            get { return _totalProgressBar; }
             set
             {
-                lock (_locker)
-                {
-                    _totalProgressBar = value;
-
-                }
+                _totalProgressBar = value;
                 OnPropertyChanged(nameof(TotalProgressBar));
-
             }
         }
 
@@ -88,22 +57,11 @@ namespace WebScraper
         private string _domain;
         public string Domain
         {
-            get
-            {
-                lock (_locker)
-                {
-                    return _domain;
-                }
-            }
+            get { return _domain; }
             set
             {
-                lock (_locker)
-                {
-                    _domain = value;
-
-                }
+                _domain = value;
                 OnPropertyChanged(nameof(Domain));
-
             }
         }
 
@@ -141,20 +99,11 @@ namespace WebScraper
 
         public int DownloadSuccess
         {
-            get
-            {
-                lock (_locker)
-                {
-                    return _downloadSuccess;
-                }
-            }
+            get { return _downloadSuccess; }
             set
             {
-                lock (_locker)
-                {
-                    _downloadSuccess = value;
 
-                }
+                _downloadSuccess = value;
                 OnPropertyChanged(nameof(DownloadSuccess));
 
             }
@@ -162,20 +111,11 @@ namespace WebScraper
 
         public int DownloadFailure
         {
-            get
-            {
-                lock (_locker)
-                {
-                    return _downloadFailure;
-                }
-            }
+            get { return _downloadFailure; }
             set
             {
-                lock (_locker)
-                {
-                    _downloadFailure = value;
 
-                }
+                _downloadFailure = value;
                 OnPropertyChanged(nameof(DownloadFailure));
 
             }
@@ -186,20 +126,11 @@ namespace WebScraper
 
         public int FilesCount
         {
-            get
-            {
-                lock (_locker)
-                {
-                    return _filesCount;
-                }
-            }
+            get { return _filesCount; }
             set
             {
-                lock (_locker)
-                {
-                    _filesCount = value;
 
-                }
+                _filesCount = value;
                 OnPropertyChanged(nameof(FilesCount));
 
             }
@@ -223,12 +154,13 @@ namespace WebScraper
         public MainBinding()
         {
             Urls = "";
-            FileBindings = new ObservableCollection<FileBinding>();
+            FileBindings = new ThreadSafeObservableCollection<FileBinding>();
             //FileProgressBar = 0;
             //ServerPaths = true;
             TotalProgressBar = 0;
             Running = false;
             ShorterDirectories = true;
+
             //DownloadedFile = string.Empty;
         }
 
