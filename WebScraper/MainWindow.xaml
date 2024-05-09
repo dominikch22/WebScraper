@@ -22,6 +22,7 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
 
 
             </Grid.RowDefinitions>
@@ -39,7 +40,9 @@
                 <Button Content="Kontynuje" Click="ContinueClicked" Name="btnContinue" Margin="5"/>
             </StackPanel>
 
-            <CheckBox Margin="10" Grid.Row="5" IsEnabled="False" Content="Skracanie zbyt długich ścieżek" IsChecked="{Binding ShorterDirectories}" />
+            <TextBlock  Margin="10" Grid.Row="5" TextWrapping="Wrap" Text="{Binding Error}"></TextBlock>
+
+            <CheckBox Margin="10" Grid.Row="6"  IsEnabled="False" Content="Skracanie zbyt długich ścieżek" IsChecked="{Binding ShorterDirectories}" />
         </Grid>
 
         <Grid Grid.Column="1">

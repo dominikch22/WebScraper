@@ -43,17 +43,28 @@ namespace WebScraper
         }
 
         public void StartClicked(object sender, RoutedEventArgs e) {
-            if (!MainBinding.Running) {
-                MainBinding.FileBindings = new ObservableCollection<FileBinding>();
-                DownloadService = new DownloadService(MainBinding);
-                DownloadService.Start();
-                MainBinding.Running = true;
+            try {
+                if (!MainBinding.Running)
+                {
+                    MainBinding.FileBindings = new ObservableCollection<FileBinding>();
+                    DownloadService = new DownloadService(MainBinding);
+                    DownloadService.Start();
+                    MainBinding.Running = true;
 
-                LocalHttpServer.Start(PathOperation.GetFolderFromDomain(MainBinding.Domain));
+                    LocalHttpServer.Start(PathOperation.GetFolderFromDomain(MainBinding.Domain));
+
+                    MainBinding.Error = "";
+                }
+
+            }catch (Exception ex)
+            {
+                MainBinding.Error = ex.Message;
+                MainBinding.Running = false;
             }
-            
 
-           
+
+
+
         }
 
         public void StopClicked(object sender, RoutedEventArgs e)

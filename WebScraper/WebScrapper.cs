@@ -117,13 +117,13 @@ namespace WebScraper
                 if (!string.IsNullOrEmpty(localPath))
                 {
                     FileBinding fileBinding = new FileBinding();
-                    string url = CssParser.MakeUrl(Url, localPath);
+                    string url = PathOperation.MakeUrl(Url, localPath);
 
-                    string shorterLocalPath = localPath.MakeShorterLocalPath();
+                    string shorterLocalPath = PathOperation.MakeShorterLocalPath(localPath);
                     node.SetAttributeValue(atrributeName, shorterLocalPath);
 
-                    string windowsPath = CssParser.ChangeUrlToWindowsPath(url, PathOperation.GetFolderFromDomain(Domain));
-                    string shorterWindowsPath = windowsPath.MakeShorterWindowsPath();
+                    string windowsPath = PathOperation.ChangeUrlToWindowsPath(url, PathOperation.GetFolderFromDomain(Domain));
+                    string shorterWindowsPath = PathOperation.MakeShorterWindowsPath(windowsPath);
 
 
                     fileBinding.Url = url;
@@ -142,7 +142,8 @@ namespace WebScraper
             MainBinding.FilesCount = MainBinding.FileBindings.Count;
 
 
-            string windowspHtlmPath = CssParser.ChangeUrlToWindowsPath(Url, PathOperation.GetFolderFromDomain(Domain));
+            string windowspHtlmPath = PathOperation.ChangeUrlToWindowsPath(Url, PathOperation.GetFolderFromDomain(Domain));
+
             Directory.CreateDirectory(Path.GetDirectoryName(windowspHtlmPath));
             htmlDocument.Save(windowspHtlmPath);
         }
@@ -162,7 +163,7 @@ namespace WebScraper
                         file.Size = e.TotalBytesToReceive;
                     };                  
 
-                    string path = CssParser.ChangeUrlToWindowsPath(file.Url, PathOperation.GetFolderFromDomain(file.Domain));
+                    string path = PathOperation.ChangeUrlToWindowsPath(file.Url, PathOperation.GetFolderFromDomain(file.Domain));
 
                     Directory.CreateDirectory(Path.GetDirectoryName(file.FileLocation));
 
@@ -207,14 +208,14 @@ namespace WebScraper
                 {
                     FileBinding fileBinding = new FileBinding();
 
-                    string url = CssParser.MakeUrl(contextUrl, localPath);
+                    string url = PathOperation.MakeUrl(contextUrl, localPath);
 
                     fileBinding.Url = url;
 
 
 
                     fileBinding.Domain = Domain;
-                    fileBinding.FileLocation = CssParser.ChangeUrlToWindowsPath(url, PathOperation.GetFolderFromDomain(fileBinding.Domain)); ;
+                    fileBinding.FileLocation = PathOperation.ChangeUrlToWindowsPath(url, PathOperation.GetFolderFromDomain(fileBinding.Domain)); ;
 
 
                     fileBinding.Downloading = 0;

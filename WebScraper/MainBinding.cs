@@ -5,51 +5,72 @@ namespace WebScraper
 {
     public class MainBinding : INotifyPropertyChanged
     {
+        private readonly object _locker = new object();
+
         private string _urls;
         public string Urls
         {
-            get { return _urls; }
+            get
+            {
+                lock (_locker)
+                {
+                    return _urls;
+                }
+            }
             set
             {
-                _urls = value;
-                OnPropertyChanged(nameof(Urls));
+                lock (_locker)
+                {
+                    _urls = value;
+                    OnPropertyChanged(nameof(Urls));
+                }
             }
         }
+
 
         private ObservableCollection<FileBinding> _fileBindings;
         public ObservableCollection<FileBinding> FileBindings
         {
-            get { return _fileBindings; }
-            set
+            get
             {
-                _fileBindings = value;
-                OnPropertyChanged(nameof(FileBindings));
+                lock (_locker)
+                {
+                    return _fileBindings;
+                }
             }
-        }
-
-        private int _fileProgressBar;
-        public int FileProgressBar
-        {
-            get { return _fileProgressBar; }
             set
             {
-                _fileProgressBar = value;
-                OnPropertyChanged(nameof(FileProgressBar));
+                lock (_locker)
+                {
+                    _fileBindings = value;
+                    OnPropertyChanged(nameof(FileBindings));
+
+                }
             }
         }
 
         private int _totalProgressBar;
         public int TotalProgressBar
         {
-            get { return _totalProgressBar; }
+            get
+            {
+                lock (_locker)
+                {
+                    return _totalProgressBar;
+                }
+            }
             set
             {
-                _totalProgressBar = value;
-                OnPropertyChanged(nameof(TotalProgressBar));
+                lock (_locker)
+                {
+                    _totalProgressBar = value;
+                    OnPropertyChanged(nameof(TotalProgressBar));
+
+                }
             }
         }
 
-        private string _downloadedFile;
+        /*private string _downloadedFile;
         public string DownloadedFile
         {
             get { return _downloadedFile; }
@@ -58,7 +79,7 @@ namespace WebScraper
                 _downloadedFile = value;
                 OnPropertyChanged(nameof(DownloadedFile));
             }
-        }
+        }*/
 
         private string _domain;
         public string Domain
@@ -104,39 +125,78 @@ namespace WebScraper
 
         public int DownloadSuccess
         {
-            get { return _downloadSuccess; }
+            get
+            {
+                lock (_locker)
+                {
+                    return _downloadSuccess;
+                }
+            }
             set
             {
-                
+                lock (_locker)
+                {
                     _downloadSuccess = value;
                     OnPropertyChanged(nameof(DownloadSuccess));
-                
+
+                }
             }
         }
 
         public int DownloadFailure
         {
-            get { return _downloadFailure; }
+            get
+            {
+                lock (_locker)
+                {
+                    return _downloadFailure;
+                }
+            }
             set
             {
-               
+                lock (_locker)
+                {
                     _downloadFailure = value;
                     OnPropertyChanged(nameof(DownloadFailure));
-                
+
+                }
             }
         }
+
 
         private int _filesCount;
 
         public int FilesCount
         {
-            get { return _filesCount; }
+            get
+            {
+                lock (_locker)
+                {
+                    return _filesCount;
+                }
+            }
             set
             {
-                
+                lock (_locker)
+                {
                     _filesCount = value;
                     OnPropertyChanged(nameof(FilesCount));
-                
+
+                }
+            }
+        }
+
+        private string _error;
+
+        public string Error
+        {
+            get { return _error; }
+            set
+            {
+
+                _error = value;
+                OnPropertyChanged(nameof(Error));
+
             }
         }
 

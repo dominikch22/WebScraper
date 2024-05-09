@@ -72,7 +72,6 @@
     <Compile Include="HtmlContent.cs" />
     <Compile Include="LocalHttpServer.cs" />
     <Compile Include="PathOperation.cs" />
-    <Compile Include="StringExtension.cs" />
     <Compile Include="WebScrapper.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

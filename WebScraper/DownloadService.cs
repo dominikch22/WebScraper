@@ -40,13 +40,17 @@ namespace WebScraper
         }
 
         public async Task Start() {
+            GetUrls();
+            List<Task> tasks = new List<Task>();
             foreach (string url in Urls)
             {
                 WebScrapper webScrapper = new WebScrapper(MainBinding, url, Domain);
                 WebScrappers.Add(webScrapper);
-                await webScrapper.IndexAndDownload();
+                tasks.Add(webScrapper.IndexAndDownload());
             }
-            DownloadHtmlResources();
+            Task.WhenAll(tasks)
+                .ContinueWith(_ => { DownloadHtmlResources(); });
+            
         }
 
         public async Task DownloadHtmlResources()
@@ -60,8 +64,9 @@ namespace WebScraper
                 //await Task.Delay(50);
 
             }
-            await Task.WhenAll(downloadResourceTask);
-            DownloadCssResources();
+            Task.WhenAll(downloadResourceTask)
+                .ContinueWith(_ => { DownloadCssResources(); });
+            
         }
 
         public async Task DownloadCssResources() {
@@ -314,7 +319,7 @@ namespace WebScraper
 
         }*/
 
-        public bool FileBindingsContains(FileBinding element)
+        /*public bool FileBindingsContains(FileBinding element)
         {
             foreach (FileBinding file in MainBinding.FileBindings)
             {
@@ -322,7 +327,7 @@ namespace WebScraper
                     return true;
             }
             return false;
-        }
+        }*/
         public void StopDownloading()
         {
             foreach (WebScrapper scrapper in WebScrappers)
