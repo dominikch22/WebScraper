@@ -17,7 +17,7 @@
         <Grid Grid.Column="0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
@@ -31,7 +31,7 @@
             <TextBox Grid.Row="1" Margin="10" Name="txtUrl" TextWrapping="Wrap" AcceptsReturn="True" 
           VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Auto" Text="{Binding Urls, Mode=TwoWay}"/>
 
-            <TextBlock Grid.Row="2" Margin="10" Text="Domena/folder do podmiany:"></TextBlock>
+            <TextBlock Grid.Row="2" Margin="10" Text="Domena do podmiany:"></TextBlock>
             <TextBox Grid.Row="3" Margin="10" Text="{Binding Domain, Mode=TwoWay}"></TextBox>
             
             <StackPanel Grid.Row="4" Margin="5" HorizontalAlignment="Right" Orientation="Horizontal">

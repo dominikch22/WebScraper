@@ -118,7 +118,7 @@ namespace WebScraper
 
             for (int i = 0; i < directories.Length - 1; i++)
             {
-                if (directories[i].Length > 36)
+                if (directories[i].Length > 25)
                     directories[i] = directories[i].Substring(0, Math.Min(directories[i].Length, 10));//GenerateRandomDirectoryName(7);
             }
 

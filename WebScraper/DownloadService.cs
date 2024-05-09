@@ -69,12 +69,34 @@ namespace WebScraper
         }
 
         public async Task DownloadCssResources() {
+            List<Task> tasks = new List<Task>();
             foreach (FileBinding file in MainBinding.FileBindings)
             {
                 WebScrapper webScrapper = new WebScrapper(MainBinding, file.Url, file.Domain);
                 WebScrappers.Add(webScrapper);
                 webScrapper.DownloadResource(file);
             }
+
+            await Task.WhenAll(tasks);
+            await Task.Delay(2000);
+            MainBinding.TotalProgressBar = 100;
+            
+            
+          /*  var continuation = Task.Factory.ContinueWhenAll(
+                    tasks.ToArray(),
+                    task => {
+                        MainBinding.TotalProgressBar = 100; 
+                    }
+                );
+            continuation.Start();
+*/
+
+
+            /* await Task.WhenAll(tasks)
+                 .ContinueWith(_ =>
+                 {
+
+                 });*/
         }
        
         public void StopDownloading()

@@ -87,6 +87,23 @@ namespace WebScraper
             }
         }
 
+        public void RemoveHttpLocationFromImages(HtmlDocument htmlDocument)
+        {
+            var imgNodes = htmlDocument.DocumentNode.SelectNodes("//img[@src]");
+
+            if (imgNodes != null)
+            {
+                foreach (HtmlNode imgNode in imgNodes)
+                {
+                    string srcValue = imgNode.GetAttributeValue("src", "");
+                    Uri uri = new Uri(srcValue);
+                    string newSrcValue = srcValue.Replace($"{uri.Scheme}:{uri.Host}", "");
+                    imgNode.SetAttributeValue("src", newSrcValue);
+                  
+                }
+            }
+        }
+
         public void IndexResources(string content)
         {
 
@@ -94,6 +111,7 @@ namespace WebScraper
             htmlDocument.LoadHtml(content);
 
             ReplaceHyperLinks(htmlDocument);
+            //RemoveHttpLocationFromImages(htmlDocument);
 
             HtmlNodeCollection nodes = htmlDocument.DocumentNode.SelectNodes("//img|//link|//script");
 
@@ -169,14 +187,15 @@ namespace WebScraper
                     Client.DownloadProgressChanged += (sender, e) =>
                     {
                         file.Downloading = e.ProgressPercentage;
-                        file.Size = e.TotalBytesToReceive;
-                        
+                        file.Size = e.TotalBytesToReceive;                     
                     };
 
-                    Client.DownloadStringCompleted += (sender, e) =>
+                    /*Client.DownloadFileCompleted += (sender, e) =>
                     {
-                        file.Downloading = 100;
-                    };
+                        if(file.Error == null && file.Size > -1)
+                            file.Downloading = 100;
+                    };*/
+
 
                     string path = PathOperation.ChangeUrlToWindowsPath(file.Url, PathOperation.GetFolderFromDomain(file.Domain));
 
@@ -271,7 +290,7 @@ namespace WebScraper
                 MainBinding.DownloadSuccess = 0;
                 foreach (var file in MainBinding.FileBindings)
                 {
-                    if (file.Error != null || file.Size == -1)
+                    if (file.Error != null)
                         MainBinding.DownloadFailure += 1;
                     if (file.Downloading == 100)
                         MainBinding.DownloadSuccess += 1;
