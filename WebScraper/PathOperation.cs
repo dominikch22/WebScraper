@@ -123,11 +123,11 @@ namespace WebScraper
             }
 
             string fileName = directories[directories.Length - 1];
-            if (fileName.Length > 25)
+            if (fileName.Length > 60)
             {
                 directories[directories.Length - 1] =
                     fileName.Substring(0, Math.Min(fileName.Length, 10)) +
-                    fileName.Substring(Math.Max(0, fileName.Length - 5)); ;
+                    fileName.Substring(Math.Max(0, fileName.Length - 5)); 
             }
 
             string shortenedPath = string.Join("\\", directories);

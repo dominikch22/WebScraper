@@ -207,7 +207,7 @@ namespace WebScraper
 
                     Client.DownloadFileCompleted += (sender, e) =>
                     {
-                        if(file.Error == null && file.Size > -1)
+                        if (file.Error == null && file.Size > -1)
                             file.Downloading = 100;
                     };
 
@@ -224,33 +224,22 @@ namespace WebScraper
                         file.Size = content.Length;
                         file.Downloading = 100;
 
-                        /* if (file.Size < 1 || content.Length == 0)
-                         {
-                             file.Error = "Empty reponse";
-
-                         }*/
                         await IndexCssContent(content, file.Url);
+                        File.WriteAllText(file.FileLocation, content);
                     }
                     else
                     {
+                        //await Client.DownloadFileTaskAsync(file.Url, file.FileLocation);
                         byte[] content = await Client.DownloadDataTaskAsync(file.Url);
                         file.Size = content.Length;
                         file.Downloading = 100;
 
-                        /* if (file.Size < 1)
-                         {
-                             file.Error = "Empty reponse";
 
-                         }
-                         else {
-                             file.Error = null;
-
-                         }*/
                         File.WriteAllBytes(file.FileLocation, content);
 
                     }
 
-                    
+
 
 
 
