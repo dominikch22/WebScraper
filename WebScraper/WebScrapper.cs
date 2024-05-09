@@ -41,11 +41,13 @@ namespace WebScraper
         public async Task<string> DownloadHtml()
         {
             FileBinding file = new FileBinding(Url, 0, 100, Domain);
-            if (!MainBinding.FileBindings.Contains(file))
-                MainBinding.FileBindings.Add(file);
-            else
-                Console.WriteLine("");
-
+            lock (MainBinding._locker)
+            {
+                if (!MainBinding.FileBindings.Contains(file))
+                    MainBinding.FileBindings.Add(file);
+                else
+                    Console.WriteLine("");
+            }
             try
             {
                 using (HttpClient client = new HttpClient())
@@ -133,15 +135,20 @@ namespace WebScraper
 
                     fileBinding.Downloading = 0;
 
-                    if (!MainBinding.FileBindings.Contains(fileBinding)) {
-                        MainBinding.FileBindings.Add(fileBinding);
+                    lock (MainBinding._locker)
+                    {
+                        if (!MainBinding.FileBindings.Contains(fileBinding))
+                        {
+                            MainBinding.FileBindings.Add(fileBinding);
+                        }
                     }
                 }
             }
+            lock (MainBinding._locker)
+            {
+                MainBinding.FilesCount = MainBinding.FileBindings.Count;
 
-            MainBinding.FilesCount = MainBinding.FileBindings.Count;
-
-
+            }
             string windowspHtlmPath = PathOperation.ChangeUrlToWindowsPath(Url, PathOperation.GetFolderFromDomain(Domain));
 
             Directory.CreateDirectory(Path.GetDirectoryName(windowspHtlmPath));
@@ -151,8 +158,12 @@ namespace WebScraper
       
         public async Task DownloadResource(FileBinding file)
         {
-            if (file.Downloading == 100)
-                return;
+            lock (MainBinding._locker)
+            {
+                file.Error = null;
+                if (file.Downloading == 100)
+                    return;
+            }
             try
             {
                 using (Client = new WebClient())
@@ -186,11 +197,14 @@ namespace WebScraper
             }
             catch (Exception e)
             {
-                
-                file.Error = e.Message;
+                lock (MainBinding._locker)
+                {
+                    file.Error = e.Message;
 
-                if (e.Message.Contains("The request was aborted")) {
-                    file.Error = null;
+                    if (e.Message.Contains("The request was aborted"))
+                    {
+                        file.Error = null;
+                    }
                 }
                     
             }
@@ -220,15 +234,22 @@ namespace WebScraper
 
                     fileBinding.Downloading = 0;
 
-                    if (!MainBinding.FileBindings.Contains(fileBinding))
-                    {
-                        MainBinding.FileBindings.Add(fileBinding);
+                    lock (MainBinding._locker) {
+                        if (!MainBinding.FileBindings.Contains(fileBinding))
+                        {
+                            MainBinding.FileBindings.Add(fileBinding);
+                        }
                     }
+                    
                     
                 }
             }
 
-            MainBinding.FilesCount = MainBinding.FileBindings.Count;
+            lock (MainBinding._locker)
+            {
+                MainBinding.FilesCount = MainBinding.FileBindings.Count;
+
+            }
 
         }
 
@@ -238,24 +259,27 @@ namespace WebScraper
 
         public void CalculateTotalProgress()
         {
-            int count = MainBinding.FileBindings.Count;
-            int sum = 0;
+            lock (MainBinding._locker) {
+                int count = MainBinding.FileBindings.Count;
+                int sum = 0;
 
-            MainBinding.DownloadFailure = 0;
-            MainBinding.DownloadSuccess = 0;
-            foreach (var file in MainBinding.FileBindings)
-            {
-                if (file.Error != null)
-                    MainBinding.DownloadFailure += 1;
-                if (file.Downloading == 100)
-                    MainBinding.DownloadSuccess += 1;
-                if (file.Error != null || file.Downloading == 100)
-                    sum += 1;
+                MainBinding.DownloadFailure = 0;
+                MainBinding.DownloadSuccess = 0;
+                foreach (var file in MainBinding.FileBindings)
+                {
+                    if (file.Error != null)
+                        MainBinding.DownloadFailure += 1;
+                    if (file.Downloading == 100)
+                        MainBinding.DownloadSuccess += 1;
+                    if (file.Error != null || file.Downloading == 100)
+                        sum += 1;
+                }
+                double progress = ((double)sum / (double)count) * 100;
+                if (progress == 100)
+                    MainBinding.Running = false;
+                MainBinding.TotalProgressBar = (int)progress;
             }
-            int progress = (sum / count) * 100;
-            if (progress == 100)
-                MainBinding.Running = false;
-            MainBinding.TotalProgressBar = (int)progress;
+            
         }
 
 

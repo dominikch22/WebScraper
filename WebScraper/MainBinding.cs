@@ -5,7 +5,8 @@ namespace WebScraper
 {
     public class MainBinding : INotifyPropertyChanged
     {
-        private readonly object _locker = new object();
+
+        public static readonly object _locker = new object();
 
         private string _urls;
         public string Urls
@@ -22,8 +23,9 @@ namespace WebScraper
                 lock (_locker)
                 {
                     _urls = value;
-                    OnPropertyChanged(nameof(Urls));
                 }
+                OnPropertyChanged(nameof(Urls));
+
             }
         }
 
@@ -43,9 +45,10 @@ namespace WebScraper
                 lock (_locker)
                 {
                     _fileBindings = value;
-                    OnPropertyChanged(nameof(FileBindings));
 
                 }
+                OnPropertyChanged(nameof(FileBindings));
+
             }
         }
 
@@ -64,9 +67,10 @@ namespace WebScraper
                 lock (_locker)
                 {
                     _totalProgressBar = value;
-                    OnPropertyChanged(nameof(TotalProgressBar));
 
                 }
+                OnPropertyChanged(nameof(TotalProgressBar));
+
             }
         }
 
@@ -84,15 +88,26 @@ namespace WebScraper
         private string _domain;
         public string Domain
         {
-            get { return _domain; }
+            get
+            {
+                lock (_locker)
+                {
+                    return _domain;
+                }
+            }
             set
             {
-                _domain = value;
+                lock (_locker)
+                {
+                    _domain = value;
+
+                }
                 OnPropertyChanged(nameof(Domain));
+
             }
         }
 
-        private bool _serverPaths;
+        /*private bool _serverPaths;
         public bool ServerPaths
         {
             get { return _serverPaths; }
@@ -103,7 +118,7 @@ namespace WebScraper
                 OnPropertyChanged(nameof(ServerPaths));
 
             }
-        }
+        }*/
 
         private bool _shorterDirectories;
         public bool ShorterDirectories
@@ -116,11 +131,12 @@ namespace WebScraper
                 OnPropertyChanged(nameof(ShorterDirectories));
 
             }
+
         }
 
 
 
-        private int _downloadSuccess;
+    private int _downloadSuccess;
         private int _downloadFailure;
 
         public int DownloadSuccess
@@ -137,9 +153,10 @@ namespace WebScraper
                 lock (_locker)
                 {
                     _downloadSuccess = value;
-                    OnPropertyChanged(nameof(DownloadSuccess));
 
                 }
+                OnPropertyChanged(nameof(DownloadSuccess));
+
             }
         }
 
@@ -157,9 +174,10 @@ namespace WebScraper
                 lock (_locker)
                 {
                     _downloadFailure = value;
-                    OnPropertyChanged(nameof(DownloadFailure));
 
                 }
+                OnPropertyChanged(nameof(DownloadFailure));
+
             }
         }
 
@@ -180,9 +198,10 @@ namespace WebScraper
                 lock (_locker)
                 {
                     _filesCount = value;
-                    OnPropertyChanged(nameof(FilesCount));
 
                 }
+                OnPropertyChanged(nameof(FilesCount));
+
             }
         }
 
@@ -206,7 +225,7 @@ namespace WebScraper
             Urls = "";
             FileBindings = new ObservableCollection<FileBinding>();
             //FileProgressBar = 0;
-            ServerPaths = true;
+            //ServerPaths = true;
             TotalProgressBar = 0;
             Running = false;
             ShorterDirectories = true;
